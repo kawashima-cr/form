@@ -1,5 +1,3 @@
-import c from "./TextInput.module.css";
-
 type Props = {
   label: string;
   type: string;
@@ -11,15 +9,18 @@ type Props = {
 
 export default function TextInput(props: Props) {
   return (
-    <div className={c.formRow}>
-      <label className={c.formLabel} htmlFor={props.name}>
+    <div className="mb-1">
+      <label className="block" htmlFor={props.name}>
         {props.label}
       </label>
       <input
         type={props.type}
         name={props.name}
         id={props.id}
-        className={c.formInput}
+        className="
+          w-full py-2 border-2 border-indigo-500 rounded-sm 
+          focus:outline-1 focus:outline-indigo-700
+        "
         value={props.value}
         onChange={props.onChange}
       />
