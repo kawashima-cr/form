@@ -1,7 +1,7 @@
 import { useState } from "react";
 import TextInput from "../../form/TextInput";
 import { formSchema, type FormData } from "./Form.schema";
-import { inputFields } from "./Form.constants";
+import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
 
 export default function Form() {
@@ -82,14 +82,39 @@ export default function Form() {
       <form className="max-w-full text-xl" onSubmit={handleSubmit}>
         {inputFields.map((inputField) => (
           <div key={inputField.id}>
-            <TextInput
-              label={inputField.label}
-              type={inputField.type}
-              name={inputField.name}
-              id={inputField.id}
-              value={data[inputField.name] ?? ""}
-              onChange={handleChange}
-            />
+            {inputField.name === "prefecture" ? (
+              <div className="mb-1">
+                <label className="block" htmlFor="contractStatus">
+                  都道府県
+                </label>
+                <select
+                  className="
+                  w-full py-2 border-2 border-indigo-500 rounded-sm 
+                  focus:outline-1 focus:outline-indigo-700
+                "
+                  id="prefecture"
+                  name="prefecture"
+                  value={data.prefecture}
+                  onChange={handleChange}
+                >
+                  <option value="">---- 選択してください ----</option>
+                  {prefectures.map((prefecture) => (
+                    <option key={prefecture} value={prefecture}>
+                      {prefecture}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <TextInput
+                label={inputField.label}
+                type={inputField.type}
+                name={inputField.name}
+                id={inputField.id}
+                value={data[inputField.name] ?? ""}
+                onChange={handleChange}
+              />
+            )}
             <div className="min-h-6 mt-1">
               {errors[inputField.name] && (
                 <p className="text-red-600 text-sm/normal m-0">
