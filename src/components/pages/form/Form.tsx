@@ -1,9 +1,8 @@
 import { useState } from "react";
-import c from "./Form.module.css";
 import TextInput from "../../form/TextInput";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields } from "./Form.constants";
-import { fetchAddress } from "../../../api/postalcode";
+import { fetchAddress } from "../../../api/postalCode";
 
 export default function Form() {
   const [data, setData] = useState<FormData>({
@@ -79,8 +78,8 @@ export default function Form() {
   };
 
   return (
-    <div className={c.wrapper}>
-      <form className={c.form} onSubmit={handleSubmit}>
+    <div className="w-[400px] my-5 mx-auto">
+      <form className="max-w-full text-xl" onSubmit={handleSubmit}>
         {inputFields.map((inputField) => (
           <div key={inputField.id}>
             <TextInput
@@ -91,18 +90,23 @@ export default function Form() {
               value={data[inputField.name] ?? ""}
               onChange={handleChange}
             />
-            <div className={c.errorContainer}>
+            <div className="min-h-6 mt-1">
               {errors[inputField.name] && (
-                <p className={c.error}>{errors[inputField.name]}</p>
+                <p className="text-red-600 text-sm/normal m-0">
+                  {errors[inputField.name]}
+                </p>
               )}
             </div>
             {inputField.name === "postalCode" && (
-              <div className={c.postalButtonContainer}>
+              <div className="flex flex-row-reverse">
                 <button
                   type="button"
                   onClick={handleSearchAddress}
                   disabled={loading}
-                  className={`${c.button} ${c.postalButton}`}
+                  className="
+                    bg-neutral-50 hover:bg-neutral-200 transition-all
+                    w-60 text-base px-5 py-2 border rounded-sm
+                  "
                 >
                   {loading ? "入力中..." : "郵便番号から住所を自動入力"}
                 </button>
@@ -111,12 +115,15 @@ export default function Form() {
           </div>
         ))}
 
-        <div className={c.formRow}>
-          <label className={c.formLabel} htmlFor="contractStatus">
+        <div className="mb-1">
+          <label className="block" htmlFor="contractStatus">
             契約状態
           </label>
           <select
-            className={c.formInput}
+            className="
+              w-full py-2 border-2 border-indigo-500 rounded-sm 
+              focus:outline-1 focus:outline-indigo-700
+            "
             id="contractStatus"
             name="contractStatus"
             value={data.contractStatus}
@@ -128,13 +135,21 @@ export default function Form() {
             <option value="cancellation">解約</option>
           </select>
         </div>
-        <div className={c.errorContainer}>
+        <div className="min-h-6 mt-1">
           {errors.contractStatus && (
-            <p className={c.error}>{errors.contractStatus}</p>
+            <p className="text-red-600 text-sm/normal m-0">
+              {errors.contractStatus}
+            </p>
           )}
         </div>
 
-        <button type="submit" className={`${c.button} ${c.submitButton}`}>
+        <button
+          type="submit"
+          className="
+            bg-neutral-50 hover:bg-neutral-200 transition-all
+              text-lg w-50 px-8 py-4 border rounded-sm block mx-auto mt-2
+            "
+        >
           送信する
         </button>
       </form>
