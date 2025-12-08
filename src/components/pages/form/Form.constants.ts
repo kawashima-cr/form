@@ -19,7 +19,7 @@ export const inputFields: InputField[] = [
     id: "building",
   },
   { label: "電話番号", type: "text", name: "tel", id: "tel" },
-  { label: "メールアドレス", type: "text", name: "email", id: "email" },
+  { label: "メールアドレス", type: "text", name: "emails", id: "emails" },
   { label: "契約日", type: "date", name: "contractDate", id: "contractDate" },
 ];
 

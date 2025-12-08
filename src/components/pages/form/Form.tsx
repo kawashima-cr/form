@@ -13,13 +13,14 @@ export default function Form() {
     address: "",
     building: "",
     tel: "",
-    email: "",
+    emails: [""],
     contractDate: "",
     contractStatus: "initial",
+    cancellationDate: "",
   });
-  const [emails, setEmails] = useState([""]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [emailErrors, setEmailErrors] = useState<string[]>([]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -39,22 +40,37 @@ export default function Form() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setEmailErrors([]);
 
-    const result = formSchema.safeParse(data);
-    if (!result.success) {
-      // TODO
-      const newErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string;
-        newErrors[field] = issue.message;
-      });
-      setErrors(newErrors);
-      return;
-    }
+    // 空のemailを除外してバリデーション
+    const validEmails = data.emails.filter((email) => email.trim() !== "");
     const formData = {
       ...data,
-      emails: emails.filter((email) => email.trim() !== ""),
+      emails: validEmails.length > 0 ? validEmails : [""],
     };
+
+    const result = formSchema.safeParse(formData);
+
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      const newEmailErrors: string[] = [];
+
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+
+        // emailsのエラー処理
+        if (field === "emails" && issue.path.length > 1) {
+          const emailIndex = issue.path[1] as number;
+          newEmailErrors[emailIndex] = issue.message;
+        } else {
+          newErrors[field] = issue.message;
+        }
+      });
+
+      setErrors(newErrors);
+      setEmailErrors(newEmailErrors);
+      return;
+    }
 
     console.log("フォーム送信:", formData);
   };
@@ -84,15 +100,45 @@ export default function Form() {
   };
 
   const handleAddEmail = () => {
-    setEmails((prev) => [...prev, ""]);
+    setData((prev) => ({
+      ...prev,
+      emails: [...prev.emails, ""],
+    }));
   };
 
   const handleEmailChange = (index: number, value: string) => {
-    setEmails((prev) => {
-      const newEmails = [...prev];
+    setData((prev) => {
+      const newEmails = [...prev.emails];
       newEmails[index] = value;
-      return newEmails;
+      return { ...prev, emails: newEmails };
     });
+
+    // エラーをクリア
+    if (emailErrors[index]) {
+      setEmailErrors((prev) => {
+        const newErrors = [...prev];
+        newErrors[index] = "";
+        return newErrors;
+      });
+    }
+    if (errors.emails) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.emails;
+        return newErrors;
+      });
+    }
+  };
+
+  const handleRemoveEmail = (index: number) => {
+    if (data.emails.length > 1) {
+      setData((prev) => ({
+        ...prev,
+        // TODO
+        emails: prev.emails.filter((_, i) => i !== index),
+      }));
+      setEmailErrors((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   return (
@@ -123,18 +169,41 @@ export default function Form() {
                   ))}
                 </select>
               </div>
-            ) : inputField.name === "email" ? (
+            ) : inputField.name === "emails" ? (
               <div>
-                {emails.map((email, index) => (
+                {data.emails.map((email, index) => (
                   <div key={index} className="mb-2">
-                    <TextInput
-                      label={index === 0 ? inputField.label : ""}
-                      type={inputField.type}
-                      name={`${inputField.name}_${index}`}
-                      id={`${inputField.id}_${index}`}
-                      value={email}
-                      onChange={(e) => handleEmailChange(index, e.target.value)}
-                    />
+                    <div className="flex gap-2 items-end">
+                      <div className="flex-1">
+                        <TextInput
+                          label={index === 0 ? inputField.label : ""}
+                          type={
+                            inputField.type as "text" | "email" | "tel" | "date"
+                          }
+                          name={`${inputField.name}_${index}`}
+                          id={`${inputField.id}_${index}`}
+                          value={email}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleEmailChange(index, e.target.value)
+                          }
+                        />
+                      </div>
+                      {data.emails.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEmail(index)}
+                          className="rounded-full bg-red-100 hover:bg-red-200 w-10 h-10 mb-1 transition-colors"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                    {/* 各email入力欄のエラー */}
+                    {emailErrors[index] && (
+                      <p className="text-red-600 text-sm/normal m-0 mt-1">
+                        {emailErrors[index]}
+                      </p>
+                    )}
                   </div>
                 ))}
                 <div className="grid place-content-center mb-2">
@@ -157,6 +226,8 @@ export default function Form() {
                 onChange={handleChange}
               />
             )}
+
+            {/* エラー */}
             <div className="min-h-6 mt-1">
               {errors[inputField.name] && (
                 <p className="text-red-600 text-sm/normal m-0">
@@ -164,6 +235,8 @@ export default function Form() {
                 </p>
               )}
             </div>
+
+            {/* 住所自動入力 */}
             {inputField.name === "postalCode" && (
               <div className="flex flex-row-reverse">
                 <button
@@ -202,21 +275,34 @@ export default function Form() {
             <option value="cancellation">解約</option>
           </select>
         </div>
+
         {data.contractStatus === "cancellation" && (
           <div>
             <div className="min-h-6 mt-1" />
-            <label className="block" htmlFor="contractStatus">
+            <label className="block" htmlFor="cancellationDate">
               解約日
             </label>
             <input
               type="date"
+              id="cancellationDate"
+              name="cancellationDate"
+              value={data.cancellationDate}
+              onChange={handleChange}
               className="
                 w-full py-2 border-2 border-indigo-500 rounded-sm 
                 focus:outline-1 focus:outline-indigo-700
               "
             />
+            <div className="min-h-6 mt-1">
+              {errors.cancellationDate && (
+                <p className="text-red-600 text-sm/normal m-0">
+                  {errors.cancellationDate}
+                </p>
+              )}
+            </div>
           </div>
         )}
+
         <div className="min-h-6 mt-1">
           {errors.contractStatus && (
             <p className="text-red-600 text-sm/normal m-0">
