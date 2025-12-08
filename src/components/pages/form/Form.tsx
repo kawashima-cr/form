@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TextInput from "../../form/TextInput";
+import TextInput from "../../form/InputFieald";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
@@ -160,6 +160,21 @@ export default function Form() {
             <option value="cancellation">解約</option>
           </select>
         </div>
+        {data.contractStatus === "cancellation" && (
+          <div>
+            <div className="min-h-6 mt-1" />
+            <label className="block" htmlFor="contractStatus">
+              解約日
+            </label>
+            <input
+              type="date"
+              className="
+                w-full py-2 border-2 border-indigo-500 rounded-sm 
+                focus:outline-1 focus:outline-indigo-700
+              "
+            />
+          </div>
+        )}
         <div className="min-h-6 mt-1">
           {errors.contractStatus && (
             <p className="text-red-600 text-sm/normal m-0">
