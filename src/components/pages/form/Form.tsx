@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TextInput from "../../form/InputFieald";
+import TextInput from "../../form/InputField";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
