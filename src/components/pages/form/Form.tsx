@@ -17,6 +17,7 @@ export default function Form() {
     contractDate: "",
     contractStatus: "initial",
   });
+  const [emails, setEmails] = useState([""]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -50,7 +51,12 @@ export default function Form() {
       setErrors(newErrors);
       return;
     }
-    console.log("フォーム送信:", data);
+    const formData = {
+      ...data,
+      emails: emails.filter((email) => email.trim() !== ""),
+    };
+
+    console.log("フォーム送信:", formData);
   };
 
   const handleSearchAddress = async () => {
@@ -77,6 +83,18 @@ export default function Form() {
     }
   };
 
+  const handleAddEmail = () => {
+    setEmails((prev) => [...prev, ""]);
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    setEmails((prev) => {
+      const newEmails = [...prev];
+      newEmails[index] = value;
+      return newEmails;
+    });
+  };
+
   return (
     <div className="w-[400px] my-5 mx-auto">
       <form className="max-w-full text-xl" onSubmit={handleSubmit}>
@@ -85,15 +103,15 @@ export default function Form() {
             {inputField.name === "prefecture" ? (
               <div className="mb-1">
                 <label className="block" htmlFor="contractStatus">
-                  都道府県
+                  {inputField.label}
                 </label>
                 <select
                   className="
                   w-full py-2 border-2 border-indigo-500 rounded-sm 
                   focus:outline-1 focus:outline-indigo-700
                 "
-                  id="prefecture"
-                  name="prefecture"
+                  id={inputField.id}
+                  name={inputField.name}
                   value={data.prefecture}
                   onChange={handleChange}
                 >
@@ -104,6 +122,30 @@ export default function Form() {
                     </option>
                   ))}
                 </select>
+              </div>
+            ) : inputField.name === "email" ? (
+              <div>
+                {emails.map((email, index) => (
+                  <div key={index} className="mb-2">
+                    <TextInput
+                      label={index === 0 ? inputField.label : ""}
+                      type={inputField.type}
+                      name={`${inputField.name}_${index}`}
+                      id={`${inputField.id}_${index}`}
+                      value={email}
+                      onChange={(e) => handleEmailChange(index, e.target.value)}
+                    />
+                  </div>
+                ))}
+                <div className="grid place-content-center mb-2">
+                  <button
+                    type="button"
+                    onClick={handleAddEmail}
+                    className="rounded-full bg-neutral-200 hover:bg-neutral-300 w-10 h-10 transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             ) : (
               <TextInput
