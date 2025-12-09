@@ -7,7 +7,7 @@ type Props = {
   onChange: React.ChangeEventHandler<HTMLInputElement>;
 };
 
-export default function TextInput(props: Props) {
+export function TextInput(props: Props) {
   return (
     <div className="mb-1">
       <label className="block" htmlFor={props.name}>

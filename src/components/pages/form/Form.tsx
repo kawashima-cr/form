@@ -1,9 +1,9 @@
 import { useState } from "react";
-import TextInput from "../../form/InputField";
+import { TextInput } from "../../form/InputField";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
-import ErrorMessage from "../../form/ErrorMessage";
+import { ErrorMessage } from "../../form/ErrorMessage";
 
 export default function Form() {
   const [data, setData] = useState<FormData>({
@@ -73,6 +73,7 @@ export default function Form() {
     }
 
     console.log("フォーム送信:", formData);
+    JSON.stringify(formData, null, 2);
   };
 
   const handleSearchAddress = async () => {
@@ -130,7 +131,6 @@ export default function Form() {
     if (data.emails.length > 1) {
       setData((prev) => ({
         ...prev,
-        // TODO
         emails: prev.emails.filter((_, i) => i !== index),
       }));
       setEmailErrors((prev) => prev.filter((_, i) => i !== index));
