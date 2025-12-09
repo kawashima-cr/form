@@ -38,7 +38,7 @@ export default function Form() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setEmailErrors([]);
@@ -72,8 +72,22 @@ export default function Form() {
       return;
     }
 
-    console.log("フォーム送信:", formData);
-    JSON.stringify(formData, null, 2);
+    try {
+      const response = await fetch("http://localhost:3001/api/data", {
+        method: "POST",
+        headers: { "content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("送信成功:", result.data);
+        alert("送信成功しました！");
+      }
+    } catch (error) {
+      console.error("送信エラー:", error);
+      alert("送信失敗しました。");
+    }
   };
 
   const handleSearchAddress = async () => {
