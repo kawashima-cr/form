@@ -3,6 +3,7 @@ import TextInput from "../../form/InputField";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
+import ErrorMessage from "../../form/ErrorMessage";
 
 export default function Form() {
   const [data, setData] = useState<FormData>({
@@ -194,11 +195,10 @@ export default function Form() {
                       )}
                     </div>
                     {/* 各email入力欄のエラー */}
-                    {emailErrors[index] && (
-                      <p className="text-red-600 text-sm/normal m-0 mt-1">
-                        {emailErrors[index]}
-                      </p>
-                    )}
+                    <ErrorMessage
+                      message={emailErrors[index]}
+                      className="min-h-0 mt-0"
+                    />
                   </div>
                 ))}
                 <div className="grid place-content-center mb-2">
@@ -222,14 +222,7 @@ export default function Form() {
               />
             )}
 
-            {/* エラー */}
-            <div className="min-h-6 mt-1">
-              {errors[inputField.name] && (
-                <p className="text-red-600 text-sm/normal m-0">
-                  {errors[inputField.name]}
-                </p>
-              )}
-            </div>
+            <ErrorMessage message={errors[inputField.name]} />
 
             {/* 住所自動入力 */}
             {inputField.name === "postalCode" && (
@@ -271,9 +264,10 @@ export default function Form() {
           </select>
         </div>
 
+        <ErrorMessage message={errors.contractStatus} />
+
         {data.contractStatus === "cancellation" && (
           <div>
-            <div className="min-h-6 mt-1" />
             <label className="block" htmlFor="cancellationDate">
               解約日
             </label>
@@ -288,23 +282,9 @@ export default function Form() {
                 focus:outline-1 focus:outline-indigo-700
               "
             />
-            <div className="min-h-6 mt-1">
-              {errors.cancellationDate && (
-                <p className="text-red-600 text-sm/normal m-0">
-                  {errors.cancellationDate}
-                </p>
-              )}
-            </div>
+            <ErrorMessage message={errors.cancellationDate} />
           </div>
         )}
-
-        <div className="min-h-6 mt-1">
-          {errors.contractStatus && (
-            <p className="text-red-600 text-sm/normal m-0">
-              {errors.contractStatus}
-            </p>
-          )}
-        </div>
 
         <button
           type="submit"
