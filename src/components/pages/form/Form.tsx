@@ -42,11 +42,10 @@ export default function Form() {
     setErrors({});
     setEmailErrors([]);
 
-    // 空のemailを除外してバリデーション
     const validEmails = data.emails.filter((email) => email.trim() !== "");
     const formData = {
       ...data,
-      emails: validEmails.length > 0 ? validEmails : [""],
+      emails: validEmails.length > 0 ? validEmails : [""], // 空なら[""]でエラーを出す
     };
 
     const result = formSchema.safeParse(formData);
@@ -113,21 +112,17 @@ export default function Form() {
       return { ...prev, emails: newEmails };
     });
 
-    // エラーをクリア
-    if (emailErrors[index]) {
-      setEmailErrors((prev) => {
-        const newErrors = [...prev];
-        newErrors[index] = "";
-        return newErrors;
-      });
-    }
-    if (errors.emails) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.emails;
-        return newErrors;
-      });
-    }
+    // エラークリア
+    setEmailErrors((prev) => {
+      const newErrors = [...prev];
+      newErrors[index] = "";
+      return newErrors;
+    });
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors.emails;
+      return newErrors;
+    });
   };
 
   const handleRemoveEmail = (index: number) => {
