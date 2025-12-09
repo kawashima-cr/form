@@ -5,7 +5,7 @@ type Props = {
   className?: string;
 };
 
-export default function ErrorMessage(props: Props) {
+export function ErrorMessage(props: Props) {
   return (
     <div className={twMerge(`min-h-6 mt-1, ${props.className}`)}>
       {props.message && (

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import TextInput from "../../form/InputField";
+import { TextInput } from "../../form/InputField";
 import { formSchema, type FormData } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
-import ErrorMessage from "../../form/ErrorMessage";
+import { ErrorMessage } from "../../form/ErrorMessage";
 
 export default function Form() {
   const [data, setData] = useState<FormData>({
@@ -38,7 +38,7 @@ export default function Form() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setEmailErrors([]);
@@ -72,7 +72,22 @@ export default function Form() {
       return;
     }
 
-    console.log("フォーム送信:", formData);
+    try {
+      const response = await fetch("http://localhost:3001/api/data", {
+        method: "POST",
+        headers: { "content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("送信成功:", result.data);
+        alert("送信成功しました！");
+      }
+    } catch (error) {
+      console.error("送信エラー:", error);
+      alert("送信失敗しました。");
+    }
   };
 
   const handleSearchAddress = async () => {
@@ -130,7 +145,6 @@ export default function Form() {
     if (data.emails.length > 1) {
       setData((prev) => ({
         ...prev,
-        // TODO
         emails: prev.emails.filter((_, i) => i !== index),
       }));
       setEmailErrors((prev) => prev.filter((_, i) => i !== index));
