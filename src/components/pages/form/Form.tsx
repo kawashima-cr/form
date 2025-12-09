@@ -195,11 +195,10 @@ export default function Form() {
                       )}
                     </div>
                     {/* 各email入力欄のエラー */}
-                    {emailErrors[index] && (
-                      <p className="text-red-600 text-sm/normal m-0 mt-1">
-                        {emailErrors[index]}
-                      </p>
-                    )}
+                    <ErrorMessage
+                      message={emailErrors[index]}
+                      className="min-h-0 mt-0"
+                    />
                   </div>
                 ))}
                 <div className="grid place-content-center mb-2">
@@ -223,7 +222,6 @@ export default function Form() {
               />
             )}
 
-            {/* エラー */}
             <ErrorMessage message={errors[inputField.name]} />
 
             {/* 住所自動入力 */}
