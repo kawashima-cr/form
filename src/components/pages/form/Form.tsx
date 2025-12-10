@@ -1,42 +1,27 @@
 import { useState } from "react";
 import { TextInput } from "../../form/InputField";
-import { formSchema, type FormData } from "./Form.schema";
+import { formSchema } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
 import { ErrorMessage } from "../../form/ErrorMessage";
+import { useFormData } from "../../../hooks/useFormData";
 
 export default function Form() {
-  const [data, setData] = useState<FormData>({
-    company: "",
-    postalCode: "",
-    prefecture: "",
-    city: "",
-    address: "",
-    building: "",
-    tel: "",
-    emails: [""],
-    contractDate: "",
-    contractStatus: "initial",
-    cancellationDate: "",
-  });
+  const {
+    data,
+    setData,
+    errors,
+    setErrors,
+    emailErrors,
+    setEmailErrors,
+    handleChange,
+    handleEmailChange,
+    handleAddEmail,
+    handleRemoveEmail,
+    resetForm,
+  } = useFormData();
+
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [emailErrors, setEmailErrors] = useState<string[]>([]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setData((prev) => ({ ...prev, [name]: value }));
-
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +68,7 @@ export default function Form() {
       if (result.success) {
         console.log("送信成功:", result.data);
         alert("送信成功しました！");
+        resetForm();
       }
     } catch (error) {
       console.error("送信エラー:", error);
@@ -111,43 +97,6 @@ export default function Form() {
       }));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddEmail = () => {
-    setData((prev) => ({
-      ...prev,
-      emails: [...prev.emails, ""],
-    }));
-  };
-
-  const handleEmailChange = (index: number, value: string) => {
-    setData((prev) => {
-      const newEmails = [...prev.emails];
-      newEmails[index] = value;
-      return { ...prev, emails: newEmails };
-    });
-
-    // エラークリア
-    setEmailErrors((prev) => {
-      const newErrors = [...prev];
-      newErrors[index] = "";
-      return newErrors;
-    });
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors.emails;
-      return newErrors;
-    });
-  };
-
-  const handleRemoveEmail = (index: number) => {
-    if (data.emails.length > 1) {
-      setData((prev) => ({
-        ...prev,
-        emails: prev.emails.filter((_, i) => i !== index),
-      }));
-      setEmailErrors((prev) => prev.filter((_, i) => i !== index));
     }
   };
 
