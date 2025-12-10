@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { TextInput } from "../../form/InputField";
-import { formSchema } from "./Form.schema";
+import { formSchema, type FormDataType } from "./Form.schema";
 import { inputFields, prefectures } from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
 import { ErrorMessage } from "../../form/ErrorMessage";
 import { useFormData } from "../../../hooks/useFormData";
+import { SavedDataList } from "../../form/SavedDataList";
 
 export default function Form() {
   const {
@@ -100,8 +101,14 @@ export default function Form() {
     }
   };
 
+  const handleLoadData = (loadedData: FormDataType) => {
+    setData(loadedData);
+    alert("データを読み込みました！");
+  };
+
   return (
     <div className="w-[400px] my-5 mx-auto">
+      <SavedDataList onLoadData={handleLoadData} />
       <form className="max-w-full text-xl" onSubmit={handleSubmit}>
         {inputFields.map((inputField) => (
           <div key={inputField.id}>

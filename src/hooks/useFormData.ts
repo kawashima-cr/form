@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { FormData } from "../components/pages/form/Form.schema";
+import type { FormDataType } from "../components/pages/form/Form.schema";
 
 export const useFormData = () => {
-  const [data, setData] = useState<FormData>({
+  const [data, setData] = useState<FormDataType>({
     company: "",
     postalCode: "",
     prefecture: "",

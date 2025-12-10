@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import fs from "fs/promises";
 import path from "path";
-import { FormData } from "./src/components/pages/form/Form.schema.js";
+import { FormDataType } from "./src/components/pages/form/Form.schema.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +15,7 @@ const DATA_FILE = path.join(__dirname, "data.json");
 app.use(cors());
 app.use(express.json());
 
-type FormDataDB = FormData & {
+type FormDataDB = FormDataType & {
   id: number;
   createdAt: Date;
   updatedAt: Date;
@@ -47,6 +47,17 @@ app.post("/api/data", async (req, res) => {
   } catch (error) {
     console.error("保存エラー:", error);
     res.status(500).json({ success: false, error: "送信失敗..." });
+  }
+});
+
+app.get("/api/data", async (req, res) => {
+  try {
+    const fileContent = await fs.readFile(DATA_FILE, "utf-8");
+    const data = JSON.parse(fileContent);
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("読み込みエラー:", error);
+    res.json({ success: true, data: [] });
   }
 });
 
