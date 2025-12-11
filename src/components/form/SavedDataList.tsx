@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormDataType } from "../pages/form/Form.schema";
+import useDataList from "../../hooks/useDataList";
 
 type SavedFormData = FormDataType & {
   id: number;
@@ -11,26 +12,12 @@ type SavedDataListProps = {
 };
 
 export function SavedDataList(props: SavedDataListProps) {
-  const [savedDataList, setSavedDataList] = useState<SavedFormData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showList, setShowList] = useState(false);
+  const { dataList, isLoading, error, fetchData } = useDataList();
 
-  const fetchSavedData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("http://localhost:3001/api/data");
-      const result = await response.json();
-
-      if (result.success) {
-        setSavedDataList(result.data);
-        setShowList(true);
-      }
-    } catch (error) {
-      console.error("取得エラー:", error);
-      alert("データの取得に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleFetchData = async () => {
+    await fetchData();
+    setShowList(true);
   };
 
   const handleSelectData = (selectedData: SavedFormData) => {
@@ -57,7 +44,7 @@ export function SavedDataList(props: SavedDataListProps) {
         {!showList ? (
           <button
             type="button"
-            onClick={fetchSavedData}
+            onClick={handleFetchData}
             disabled={isLoading}
             className="
             bg-blue-50 hover:bg-blue-100 transition-all w-60
@@ -82,6 +69,9 @@ export function SavedDataList(props: SavedDataListProps) {
         )}
       </div>
 
+      {/* エラー表示 */}
+      {error && <div className="text-red-500 text-center mb-2">{error}</div>}
+
       {/* データ一覧表示 */}
       {showList && (
         <div
@@ -105,13 +95,13 @@ export function SavedDataList(props: SavedDataListProps) {
             </button>
           </div>
 
-          {savedDataList.length === 0 ? (
+          {dataList.length === 0 ? (
             <p className="text-gray-500 text-center py-4">
               保存されたデータがありません
             </p>
           ) : (
             <ul className="space-y-2">
-              {savedDataList.map((item) => (
+              {dataList.map((item) => (
                 <li
                   key={item.id}
                   onClick={() => handleSelectData(item)}

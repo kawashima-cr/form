@@ -1,41 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import type { FormDataType } from "../form/Form.schema";
-
-type SavedFormData = {
-  id: number;
-  createdAt: string;
-} & FormDataType;
+import { Search } from "lucide-react";
+import useDataList from "../../../hooks/useDataList";
 
 export default function List() {
-  const [dataList, setDataList] = useState<SavedFormData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { dataList, error, fetchData, isLoading } = useDataList({
+    autoFetch: true,
+  });
 
-  // TODO: hook化検討
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // const filteredData = () => {
 
-    try {
-      const response = await fetch("http://localhost:3001/api/data");
-      const result = await response.json();
-
-      if (result.success) {
-        setDataList(result.data);
-      } else {
-        setError("データの取得に失敗しました");
-      }
-    } catch (error) {
-      console.error("取得エラー:", error);
-      setError("サーバーとの通信に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  // }
 
   // ローディング中
   if (isLoading) {
@@ -78,15 +51,37 @@ export default function List() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 bg-neutral-50 rounded-2xl text-gray-800">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl bold ">データ一覧</h2>
+      {/* ヘッダー */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl bold">データ一覧</h2>
         <button
           type="button"
           onClick={fetchData}
-          className="px-4 py-2 border border-zinc-300 rounded-2xl text-gray-800 bg-cyan-50 hover:bg-cyan-100 transition-colors duration-200"
+          className="px-4 py-2 border border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
         >
           更新
         </button>
+      </div>
+      {/* 検索バー */}
+      <div className="mb-10 grid place-items-center">
+        <form className="flex w-full items-center">
+          <div className="relative flex-1 mr-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              name="search"
+              id="search"
+              className="w-full rounded-full border border-gray-100 bg-white px-12 py-2  shadow/20 hover:shadow-md focus:outline-0"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="px-4 py-2 border whitespace-nowrap border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+          >
+            検索
+          </button>
+        </form>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
@@ -156,7 +151,7 @@ export default function List() {
                 </div>
               )}
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-600">
+            <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">
               作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
             </div>
           </div>
