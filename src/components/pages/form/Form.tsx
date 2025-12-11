@@ -68,12 +68,10 @@ export default function Form() {
 
       if (result.success) {
         console.log("送信成功:", result.data);
-        alert("送信成功しました！");
         resetForm();
       }
     } catch (error) {
       console.error("送信エラー:", error);
-      alert("送信失敗しました。");
     }
   };
 
@@ -103,7 +101,6 @@ export default function Form() {
 
   const handleLoadData = (loadedData: FormDataType) => {
     setData(loadedData);
-    alert("データを読み込みました！");
   };
 
   return (
