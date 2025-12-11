@@ -1,7 +1,165 @@
+import { Search } from "lucide-react";
+import useDataList from "../../../hooks/useDataList";
+
 export default function List() {
+  const { dataList, error, fetchData, isLoading } = useDataList({
+    autoFetch: true,
+  });
+
+  // const filteredData = () => {
+
+  // }
+
+  // ローディング中
+  if (isLoading) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">読み込み中...</p>
+      </div>
+    );
+  }
+
+  // エラー時
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">{error}</p>
+        <button
+          onClick={fetchData}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
+
+  // データなし
+  if (dataList.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">保存されたデータがありません</p>
+        <button
+          onClick={fetchData}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-100 h-200 bg-violet-200 mx-auto p-20">
-      List Page Component
+    <div className="max-w-6xl mx-auto p-4 bg-neutral-50 rounded-2xl text-gray-800">
+      {/* ヘッダー */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl bold">データ一覧</h2>
+        <button
+          type="button"
+          onClick={fetchData}
+          className="px-4 py-2 border border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+        >
+          更新
+        </button>
+      </div>
+      {/* 検索バー */}
+      <div className="mb-10 grid place-items-center">
+        <form className="flex w-full items-center">
+          <div className="relative flex-1 mr-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              name="search"
+              id="search"
+              className="w-full rounded-full border border-gray-100 bg-white px-12 py-2  shadow/20 hover:shadow-md focus:outline-0"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="px-4 py-2 border whitespace-nowrap border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+          >
+            検索
+          </button>
+        </form>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+        {dataList.map((data) => (
+          <div
+            key={data.id}
+            className="border border-zinc-200 shadow-xs transition-all active:shadow rounded-3xl p-4 bg-white"
+          >
+            <div className="mb-3 flex justify-between data-start items-center ">
+              <h3 className="text-xl text-gray-800 font-semibold">
+                {data.company}
+              </h3>
+              <span className="text-xs text-gray-500 mr-4">ID: {data.id}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="inline-flex">
+                <p className="font-semibold text-gray-600">郵便番号:</p>
+                <p className="ml-2 text-gray-800">{data.postalCode}</p>
+              </div>
+
+              <div className="inline-flex">
+                <p className="font-semibold text-gray-600">電話:</p>
+                <p className="ml-2 text-gray-800">{data.tel}</p>
+              </div>
+
+              <div className="col-span-2 inline-flex">
+                <p className="font-semibold text-gray-600 text-nowrap">住所:</p>
+                <p className="ml-2 text-gray-800">
+                  {data.prefecture}
+                  {data.city}
+                  {data.address}
+                  {data.building && ` ${data.building}`}
+                </p>
+              </div>
+
+              <div className="col-span-2 inline-flex">
+                <p className="font-semibold text-gray-600">メール:</p>
+                <div className="ml-2 text-gray-800">
+                  {data.emails.map((email, idx) => (
+                    <div key={idx} className="text-blue-700">
+                      {email}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="inline-flex">
+                <p className="font-semibold text-gray-600">契約日:</p>
+                <p className="ml-2 text-gray-800">{data.contractDate}</p>
+              </div>
+
+              <div className="inline-flex">
+                <p className="font-semibold text-gray-600">契約状態:</p>
+                <p className="ml-2 text-gray-800">
+                  {data.contractStatus === "contract" && "契約中"}
+                  {data.contractStatus === "negotiation" && "商談中"}
+                  {data.contractStatus === "cancellation" && "解約"}
+                  {data.contractStatus === "initial" && "未設定"}
+                </p>
+              </div>
+
+              {data.cancellationDate && (
+                <div className="col-spam-2 inline-flex">
+                  <p className="font-semibold text-gray-600">解約日:</p>
+                  <p className="ml-2 text-gray-800">{data.cancellationDate}</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">
+              作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-8 text-center text-sm text-gray-600">
+        全 {dataList.length} 件
+      </div>
     </div>
   );
 }

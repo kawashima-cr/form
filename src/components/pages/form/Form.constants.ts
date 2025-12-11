@@ -1,10 +1,10 @@
-import type { FormData } from "./Form.schema";
+import type { FormDataType } from "./Form.schema";
 
 type InputField = {
   label: string;
   type: string;
-  name: keyof FormData;
-  id: keyof FormData;
+  name: keyof FormDataType;
+  id: keyof FormDataType;
 };
 export const inputFields: InputField[] = [
   { label: "会社名", type: "text", name: "company", id: "company" },

@@ -53,4 +53,4 @@ export const formSchema = z
     }
   );
 
-export type FormData = z.infer<typeof formSchema>;
+export type FormDataType = z.infer<typeof formSchema>;
