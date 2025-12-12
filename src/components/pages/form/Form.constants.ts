@@ -6,6 +6,25 @@ type InputField = {
   name: keyof FormDataType;
   id: keyof FormDataType;
 };
+type ContractStatus = {
+  value: FormDataType["contractStatus"];
+  label: string;
+};
+
+export const contractStatusOptions: ContractStatus[] = [
+  { value: "contract", label: "契約中" },
+  { value: "negotiation", label: "商談中" },
+  { value: "cancellation", label: "解約" },
+] as const;
+
+export const contractStatusLabelMap: Record<FormDataType["contractStatus"], string> =
+  {
+    contract: "契約中",
+    negotiation: "商談中",
+    cancellation: "解約",
+    initial: "未設定",
+  };
+
 export const inputFields: InputField[] = [
   { label: "会社名", type: "text", name: "company", id: "company" },
   { label: "郵便番号", type: "text", name: "postalCode", id: "postalCode" },
