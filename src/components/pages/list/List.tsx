@@ -1,4 +1,4 @@
-import { RefreshCcw, Search, SquarePen } from "lucide-react";
+import { CircleX, RefreshCcw, Search, SquarePen } from "lucide-react";
 import { useMemo, useState } from "react";
 import { contractStatusLabelMap } from "../form/Form.constants";
 import useDataList from "../../../hooks/useDataList";
@@ -124,6 +124,11 @@ export default function List() {
               placeholder="会社名、住所、電話番号などで検索"
               className="w-full rounded-full border border-gray-100 bg-white px-12 py-2 shadow/20 hover:shadow-md focus:outline-0"
             />
+            {searchTerm && (
+              <button type="button" onClick={() => setSearchTerm("")}>
+                <CircleX className="absolute right-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-500 hover:rotate-90 hover:scale-110 transition-all" />
+              </button>
+            )}
           </div>
         </form>
       </div>
