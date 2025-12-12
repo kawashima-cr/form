@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormDataType } from "../pages/form/Form.schema";
 import useDataList from "../../hooks/useDataList";
+import { FolderClosed, FolderSync, SquareX } from "lucide-react";
 
 type SavedFormData = FormDataType & {
   id: number;
@@ -52,7 +53,8 @@ export function SavedDataList(props: SavedDataListProps) {
             disabled:opacity-50 disabled:cursor-not-allowed
           "
           >
-            📂 保存データを読み込む
+            <FolderSync className="inline-block align-text-top mr-2 text-gray-600" />
+            保存データを読み込む
           </button>
         ) : (
           <button
@@ -64,7 +66,8 @@ export function SavedDataList(props: SavedDataListProps) {
             disabled:opacity-50 disabled:cursor-not-allowed
           "
           >
-            📁 保存データを閉じる
+            <FolderClosed className="inline-block align-text-top mr-2 text-gray-600" />
+            保存データを閉じる
           </button>
         )}
       </div>
@@ -91,7 +94,7 @@ export function SavedDataList(props: SavedDataListProps) {
                 text-2xl font-bold w-8 h-8
               "
             >
-              ×
+              <SquareX className="m-auto " />
             </button>
           </div>
 

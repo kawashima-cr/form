@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { TextInput } from "../../form/InputField";
 import { formSchema, type FormDataType } from "./Form.schema";
-import { inputFields, prefectures } from "./Form.constants";
+import {
+  inputFields,
+  prefectures,
+  contractStatusOptions,
+} from "./Form.constants";
 import { fetchAddress } from "../../../api/postalCode";
 import { ErrorMessage } from "../../form/ErrorMessage";
 import { useFormData } from "../../../hooks/useFormData";
 import { SavedDataList } from "../../form/SavedDataList";
+import { CirclePlus, CircleX } from "lucide-react";
 
 export default function Form() {
   const {
@@ -157,7 +162,7 @@ export default function Form() {
                           onClick={() => handleRemoveEmail(index)}
                           className="rounded-full bg-red-100 hover:bg-red-200 w-10 h-10 mb-1 transition-colors"
                         >
-                          ×
+                          <CircleX className="m-auto text-red-700" />
                         </button>
                       )}
                     </div>
@@ -174,7 +179,7 @@ export default function Form() {
                     onClick={handleAddEmail}
                     className="rounded-full bg-neutral-200 hover:bg-neutral-300 w-10 h-10 transition-colors"
                   >
-                    +
+                    <CirclePlus className="m-auto" />
                   </button>
                 </div>
               </div>
@@ -224,10 +229,12 @@ export default function Form() {
             value={data.contractStatus}
             onChange={handleChange}
           >
-            <option value="initial">---- 選択してください ----</option>
-            <option value="contract">契約中</option>
-            <option value="negotiation">商談中</option>
-            <option value="cancellation">解約</option>
+            <option value="">---- 選択してください ----</option>
+            {contractStatusOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
 
