@@ -1,13 +1,7 @@
-import { RefreshCcw, Search } from "lucide-react";
-import useDataList from "../../../hooks/useDataList";
+import { RefreshCcw, Search, SquarePen } from "lucide-react";
 import { useMemo, useState } from "react";
-
-const CONTRACT_STATUS_LABELS: Record<string, string> = {
-  contract: "契約中",
-  negotiation: "商談中",
-  cancellation: "解約",
-  initial: "未設定",
-};
+import { contractStatusLabelMap } from "../form/Form.constants";
+import useDataList from "../../../hooks/useDataList";
 
 export default function List() {
   const { dataList, error, fetchData, isLoading } = useDataList({
@@ -23,7 +17,12 @@ export default function List() {
       const idMatch = String(data.id).includes(keyword);
       const companyMatch = data.company.toLowerCase().includes(keyword);
       const postalMatch = data.postalCode.toLowerCase().includes(keyword);
-      const addressMatch = [data.prefecture, data.city, data.address, data.building]
+      const addressMatch = [
+        data.prefecture,
+        data.city,
+        data.address,
+        data.building,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -33,7 +32,7 @@ export default function List() {
         email.toLowerCase().includes(keyword)
       );
       const contractStatusLabel =
-        CONTRACT_STATUS_LABELS[data.contractStatus] || "";
+        contractStatusLabelMap[data.contractStatus] || "";
       const contractMatch =
         data.contractStatus.toLowerCase().includes(keyword) ||
         contractStatusLabel.toLowerCase().includes(keyword);
@@ -49,6 +48,10 @@ export default function List() {
       );
     });
   }, [dataList, searchTerm]);
+
+  const editData = () => {
+    // 編集機能
+  };
 
   // ローディング中
   if (isLoading) {
@@ -179,10 +182,7 @@ export default function List() {
               <div className="inline-flex">
                 <p className="font-semibold text-gray-600">契約状態:</p>
                 <p className="ml-2 text-gray-800">
-                  {data.contractStatus === "contract" && "契約中"}
-                  {data.contractStatus === "negotiation" && "商談中"}
-                  {data.contractStatus === "cancellation" && "解約"}
-                  {data.contractStatus === "initial" && "未設定"}
+                  {contractStatusLabelMap[data.contractStatus]}
                 </p>
               </div>
 
@@ -193,8 +193,18 @@ export default function List() {
                 </div>
               )}
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">
-              作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
+            <div className="flex justify-between mt-3 pt-3 border-t border-gray-200 items-center">
+              <div className="text-xs text-gray-600">
+                作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
+              </div>
+              <button
+                type="button"
+                onClick={editData}
+                className="text-xs text-gray-600 rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
+              >
+                <SquarePen className="inline-block h-4 w-4 text-gray-500" />
+                編集
+              </button>
             </div>
           </div>
         ))}
