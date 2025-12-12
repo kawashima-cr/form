@@ -1,19 +1,54 @@
 import { RefreshCcw, Search } from "lucide-react";
 import useDataList from "../../../hooks/useDataList";
+import { useMemo, useState } from "react";
+
+const CONTRACT_STATUS_LABELS: Record<string, string> = {
+  contract: "契約中",
+  negotiation: "商談中",
+  cancellation: "解約",
+  initial: "未設定",
+};
 
 export default function List() {
   const { dataList, error, fetchData, isLoading } = useDataList({
     autoFetch: true,
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // const filteredData = () => {
-  //   if (!dataList) return dataList;
+  const filteredData = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) return dataList;
 
-  //   dataList.filter((data) => {
-  //     //検索ロジック
-  //     data.company;
-  //   });
-  // };
+    return dataList.filter((data) => {
+      const idMatch = String(data.id).includes(keyword);
+      const companyMatch = data.company.toLowerCase().includes(keyword);
+      const postalMatch = data.postalCode.toLowerCase().includes(keyword);
+      const addressMatch = [data.prefecture, data.city, data.address, data.building]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword);
+      const telMatch = data.tel.toLowerCase().includes(keyword);
+      const emailMatch = data.emails.some((email) =>
+        email.toLowerCase().includes(keyword)
+      );
+      const contractStatusLabel =
+        CONTRACT_STATUS_LABELS[data.contractStatus] || "";
+      const contractMatch =
+        data.contractStatus.toLowerCase().includes(keyword) ||
+        contractStatusLabel.toLowerCase().includes(keyword);
+
+      return (
+        idMatch ||
+        companyMatch ||
+        postalMatch ||
+        addressMatch ||
+        telMatch ||
+        emailMatch ||
+        contractMatch
+      );
+    });
+  }, [dataList, searchTerm]);
 
   // ローディング中
   if (isLoading) {
@@ -57,48 +92,45 @@ export default function List() {
   return (
     <div className="max-w-6xl mx-auto py-6 px-8 bg-neutral-50 rounded-2xl text-gray-800">
       {/* ヘッダー */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl bold">データ一覧</h2>
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-3xl font-bold">データ一覧</h2>
         <button
           type="button"
           onClick={fetchData}
           className="group px-4 py-2 border border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
         >
-          <RefreshCcw className="inline-block h-5 w-5 text-gray-600 group-hover:-rotate-45 transition-all" />
-          <p className="text-xs text-gray-500">更新</p>
+          <RefreshCcw className="inline-block h-5 w-5 text-gray-700 group-hover:-rotate-45 transition-all" />
+          <p className="text-xs text-gray-600">更新</p>
         </button>
       </div>
 
       {/* 検索バー */}
-      <div className="mb-10 grid place-items-center">
-        <form className="flex w-full items-center">
+      <div className="mb-12 grid place-items-center">
+        <form
+          className="flex w-full items-center"
+          onSubmit={(e) => e.preventDefault()}
+        >
           <div className="relative flex-1 mr-3">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               name="search"
               id="search"
-              // value={}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="会社名、住所、電話番号などで検索"
               className="w-full rounded-full border border-gray-100 bg-white px-12 py-2 shadow/20 hover:shadow-md focus:outline-0"
             />
           </div>
-
-          {/* <button
-            type="submit"
-            className="px-4 py-2 border whitespace-nowrap border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
-          >
-            検索
-          </button> */}
         </form>
       </div>
 
       {/* 詳細情報 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-        {dataList.map((data) => (
+        {filteredData.map((data) => (
           <div
             key={data.id}
-            className="border border-zinc-200 shadow-xs transition-all active:shadow rounded-3xl p-4 bg-white"
+            className="border border-zinc-200 shadow-xs transition-all hover:shadow rounded-3xl p-4 bg-white"
           >
             <div className="mb-3 flex justify-between data-start items-center ">
               <h3 className="text-xl text-gray-800 font-semibold">
@@ -168,7 +200,7 @@ export default function List() {
         ))}
       </div>
       <div className="mt-8 text-center text-sm text-gray-600">
-        全 {dataList.length} 件
+        全 {filteredData.length} 件
       </div>
     </div>
   );
