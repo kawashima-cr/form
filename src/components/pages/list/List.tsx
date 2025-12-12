@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { RefreshCcw, Search } from "lucide-react";
 import useDataList from "../../../hooks/useDataList";
 
 export default function List() {
@@ -7,8 +7,13 @@ export default function List() {
   });
 
   // const filteredData = () => {
+  //   if (!dataList) return dataList;
 
-  // }
+  //   dataList.filter((data) => {
+  //     //検索ロジック
+  //     data.company;
+  //   });
+  // };
 
   // ローディング中
   if (isLoading) {
@@ -50,18 +55,20 @@ export default function List() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-neutral-50 rounded-2xl text-gray-800">
+    <div className="max-w-6xl mx-auto py-6 px-8 bg-neutral-50 rounded-2xl text-gray-800">
       {/* ヘッダー */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl bold">データ一覧</h2>
         <button
           type="button"
           onClick={fetchData}
-          className="px-4 py-2 border border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+          className="group px-4 py-2 border border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
         >
-          更新
+          <RefreshCcw className="inline-block h-5 w-5 text-gray-600 group-hover:-rotate-45 transition-all" />
+          <p className="text-xs text-gray-500">更新</p>
         </button>
       </div>
+
       {/* 検索バー */}
       <div className="mb-10 grid place-items-center">
         <form className="flex w-full items-center">
@@ -71,19 +78,22 @@ export default function List() {
               type="text"
               name="search"
               id="search"
-              className="w-full rounded-full border border-gray-100 bg-white px-12 py-2  shadow/20 hover:shadow-md focus:outline-0"
+              // value={}
+              placeholder="会社名、住所、電話番号などで検索"
+              className="w-full rounded-full border border-gray-100 bg-white px-12 py-2 shadow/20 hover:shadow-md focus:outline-0"
             />
           </div>
 
-          <button
+          {/* <button
             type="submit"
             className="px-4 py-2 border whitespace-nowrap border-zinc-300 hover:border-zinc-400 rounded-2xl text-gray-800 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
           >
             検索
-          </button>
+          </button> */}
         </form>
       </div>
 
+      {/* 詳細情報 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         {dataList.map((data) => (
           <div
