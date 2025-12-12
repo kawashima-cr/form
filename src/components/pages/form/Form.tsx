@@ -6,6 +6,7 @@ import { fetchAddress } from "../../../api/postalCode";
 import { ErrorMessage } from "../../form/ErrorMessage";
 import { useFormData } from "../../../hooks/useFormData";
 import { SavedDataList } from "../../form/SavedDataList";
+import { CirclePlus } from "lucide-react";
 
 export default function Form() {
   const {
@@ -174,7 +175,7 @@ export default function Form() {
                     onClick={handleAddEmail}
                     className="rounded-full bg-neutral-200 hover:bg-neutral-300 w-10 h-10 transition-colors"
                   >
-                    +
+                    <CirclePlus className="m-auto" />
                   </button>
                 </div>
               </div>
