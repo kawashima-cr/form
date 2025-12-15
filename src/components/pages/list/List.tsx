@@ -8,6 +8,7 @@ export default function List() {
     autoFetch: true,
   });
   const [searchTerm, setSearchTerm] = useState("");
+  // const [editingDataId, setEditingDataId] = useState<number | null>(null);
 
   const filteredData = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -138,7 +139,7 @@ export default function List() {
         {filteredData.map((data) => (
           <div
             key={data.id}
-            className="border border-zinc-200 shadow-xs rounded-3xl p-4 bg-white"
+            className="border border-zinc-200 shadow-xs rounded-3xl p-4 bg-white flex flex-col h-full"
           >
             <div className="mb-3 flex justify-between data-start items-center ">
               <h3 className="text-xl text-gray-800 font-semibold">
@@ -147,7 +148,7 @@ export default function List() {
               <span className="text-xs text-gray-500 mr-4">ID: {data.id}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm flex-1">
               <div className="inline-flex">
                 <p className="font-semibold text-gray-600">郵便番号:</p>
                 <p className="ml-2 text-gray-800">{data.postalCode}</p>
@@ -198,6 +199,8 @@ export default function List() {
                 </div>
               )}
             </div>
+
+            {/* カードfooter */}
             <div className="flex justify-between mt-3 pt-3 border-t border-gray-200 items-center">
               <div className="text-xs text-gray-600">
                 作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
@@ -205,10 +208,12 @@ export default function List() {
               <button
                 type="button"
                 onClick={editData}
-                className="text-xs text-gray-600 rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
+                className="group text-xs rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
               >
-                <SquarePen className="inline-block h-4 w-4 text-gray-500" />
-                編集
+                <SquarePen className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
+                <span className="text-gray-500 group-hover:text-gray-600">
+                  編集
+                </span>
               </button>
             </div>
           </div>
