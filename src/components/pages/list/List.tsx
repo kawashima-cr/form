@@ -133,12 +133,12 @@ export default function List() {
         </form>
       </div>
 
-      {/* 詳細情報 */}
+      {/* カード詳細情報 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         {filteredData.map((data) => (
           <div
             key={data.id}
-            className="border border-zinc-200 shadow-xs transition-all hover:shadow rounded-3xl p-4 bg-white"
+            className="border border-zinc-200 shadow-xs rounded-3xl p-4 bg-white"
           >
             <div className="mb-3 flex justify-between data-start items-center ">
               <h3 className="text-xl text-gray-800 font-semibold">
