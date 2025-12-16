@@ -4,10 +4,11 @@ import type { FormDataType } from "../components/pages/form/Form.schema";
 type SavedFormData = {
   id: number;
   createdAt: string;
+  updatedAt?: string;
 } & FormDataType;
 
 type UseDataListOptions = {
-  autoFetch?: boolean; // 自動で取得するか（List用）
+  autoFetch?: boolean;
 };
 
 export default function useDataList(options?: UseDataListOptions) {
@@ -15,6 +16,7 @@ export default function useDataList(options?: UseDataListOptions) {
 
   const [dataList, setDataList] = useState<SavedFormData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -27,7 +29,7 @@ export default function useDataList(options?: UseDataListOptions) {
 
       if (result.success) {
         setDataList(result.data);
-        return result.data;
+        return result.data as SavedFormData[];
       } else {
         setError("データの取得に失敗しました");
         return null;
@@ -41,6 +43,30 @@ export default function useDataList(options?: UseDataListOptions) {
     }
   }, []);
 
+  const updateData = useCallback(async (id: number, payload: FormDataType) => {
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/data/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "更新に失敗しました");
+      }
+
+      const updatedItem = result.data as SavedFormData;
+      setDataList((prev) =>
+        prev.map((item) => (item.id === id ? updatedItem : item))
+      );
+      return updatedItem;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (autoFetch) {
       fetchData();
@@ -50,7 +76,9 @@ export default function useDataList(options?: UseDataListOptions) {
   return {
     dataList,
     isLoading,
+    isUpdating,
     error,
     fetchData,
+    updateData,
   };
 }

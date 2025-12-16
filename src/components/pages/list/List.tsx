@@ -1,13 +1,17 @@
-import { RefreshCcw, Search, SquarePen } from "lucide-react";
+import { CircleX, RefreshCcw, Search, SquarePen } from "lucide-react";
 import { useMemo, useState } from "react";
 import { contractStatusLabelMap } from "../form/Form.constants";
 import useDataList from "../../../hooks/useDataList";
+import Form from "../form/Form";
+import { type FormDataType } from "../form/Form.schema";
 
 export default function List() {
-  const { dataList, error, fetchData, isLoading } = useDataList({
-    autoFetch: true,
-  });
+  const { dataList, error, fetchData, isLoading, isUpdating, updateData } =
+    useDataList({ autoFetch: true });
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const filteredData = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -49,11 +53,40 @@ export default function List() {
     });
   }, [dataList, searchTerm]);
 
-  const editData = () => {
-    // 編集機能
+  const editingData = useMemo(
+    () => dataList.find((data) => data.id === editingId) ?? null,
+    [dataList, editingId]
+  );
+
+  const editingInitialValues: FormDataType | undefined = useMemo(() => {
+    if (!editingData) return undefined;
+    const { ...rest } = editingData;
+    return rest;
+  }, [editingData]);
+
+  const openEdit = (id: number) => {
+    setEditingId(id);
+    setIsEditOpen(true);
+    setUpdateError(null);
   };
 
-  // ローディング中
+  const closeEdit = () => {
+    setIsEditOpen(false);
+    setEditingId(null);
+    setUpdateError(null);
+  };
+
+  const handleUpdateSubmit = async (payload: FormDataType) => {
+    if (!editingData) return;
+    try {
+      await updateData(editingData.id, payload);
+      closeEdit();
+    } catch (err) {
+      console.error(err);
+      setUpdateError("更新に失敗しました。時間をおいて再度お試しください。");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-8">
@@ -124,16 +157,21 @@ export default function List() {
               placeholder="会社名、住所、電話番号などで検索"
               className="w-full rounded-full border border-gray-100 bg-white px-12 py-2 shadow/20 hover:shadow-md focus:outline-0"
             />
+            {searchTerm && (
+              <button type="button" onClick={() => setSearchTerm("")}>
+                <CircleX className="absolute right-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-500 hover:rotate-90 hover:scale-110 transition-all" />
+              </button>
+            )}
           </div>
         </form>
       </div>
 
-      {/* 詳細情報 */}
+      {/* カード詳細情報 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         {filteredData.map((data) => (
           <div
             key={data.id}
-            className="border border-zinc-200 shadow-xs transition-all hover:shadow rounded-3xl p-4 bg-white"
+            className="border border-zinc-200 shadow-xs rounded-3xl p-4 bg-white flex flex-col h-full"
           >
             <div className="mb-3 flex justify-between data-start items-center ">
               <h3 className="text-xl text-gray-800 font-semibold">
@@ -142,7 +180,7 @@ export default function List() {
               <span className="text-xs text-gray-500 mr-4">ID: {data.id}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm flex-1">
               <div className="inline-flex">
                 <p className="font-semibold text-gray-600">郵便番号:</p>
                 <p className="ml-2 text-gray-800">{data.postalCode}</p>
@@ -193,17 +231,21 @@ export default function List() {
                 </div>
               )}
             </div>
+
+            {/* カードfooter */}
             <div className="flex justify-between mt-3 pt-3 border-t border-gray-200 items-center">
               <div className="text-xs text-gray-600">
                 作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
               </div>
               <button
                 type="button"
-                onClick={editData}
-                className="text-xs text-gray-600 rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
+                onClick={() => openEdit(data.id)}
+                className="group text-xs rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
               >
-                <SquarePen className="inline-block h-4 w-4 text-gray-500" />
-                編集
+                <SquarePen className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
+                <span className="text-gray-500 group-hover:text-gray-600">
+                  編集
+                </span>
               </button>
             </div>
           </div>
@@ -212,6 +254,43 @@ export default function List() {
       <div className="mt-8 text-center text-sm text-gray-600">
         全 {filteredData.length} 件
       </div>
+
+      {/* 編集モーダル */}
+      {isEditOpen && editingData && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 overflow-y-auto"
+          onClick={closeEdit}
+        >
+          <div className="min-h-full flex items-center justify-center px-4 py-8">
+            <div
+              className="relative w-full max-w-3xl bg-white rounded-3xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 flex justify-end pb-2">
+                <button
+                  type="button"
+                  onClick={closeEdit}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <CircleX className="h-10 w-10" />
+                </button>
+              </div>
+              <h3 className="text-2xl font-semibold mb-4">
+                「{editingData.company}」を編集
+              </h3>
+              {updateError && (
+                <p className="text-red-500 text-sm mb-3">{updateError}</p>
+              )}
+              <Form
+                mode="edit"
+                initialValues={editingInitialValues}
+                onSubmit={handleUpdateSubmit}
+                submitLabel={isUpdating ? "更新中..." : "更新する"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

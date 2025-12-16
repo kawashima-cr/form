@@ -1,23 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormDataType } from "../components/pages/form/Form.schema";
 
-export const useFormData = () => {
-  const [data, setData] = useState<FormDataType>({
-    company: "",
-    postalCode: "",
-    prefecture: "",
-    city: "",
-    address: "",
-    building: "",
-    tel: "",
-    emails: [""],
-    contractDate: "",
-    contractStatus: "initial",
-    cancellationDate: "",
-  });
+const emptyData: FormDataType = {
+  company: "",
+  postalCode: "",
+  prefecture: "",
+  city: "",
+  address: "",
+  building: "",
+  tel: "",
+  emails: [""],
+  contractDate: "",
+  contractStatus: "initial",
+  cancellationDate: "",
+};
 
+export const useFormData = (initialValues?: FormDataType) => {
+  const [data, setData] = useState<FormDataType>(initialValues ?? emptyData);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emailErrors, setEmailErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setData(initialValues ?? emptyData);
+    setErrors({});
+    setEmailErrors([]);
+  }, [initialValues]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -72,19 +80,7 @@ export const useFormData = () => {
   };
 
   const resetForm = () => {
-    setData({
-      company: "",
-      postalCode: "",
-      prefecture: "",
-      city: "",
-      address: "",
-      building: "",
-      tel: "",
-      emails: [""],
-      contractDate: "",
-      contractStatus: "initial",
-      cancellationDate: "",
-    });
+    setData(initialValues ?? emptyData);
     setErrors({});
     setEmailErrors([]);
   };

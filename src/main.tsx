@@ -1,10 +1,26 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './app/App.tsx'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
+import "./index.css";
+import App from "./app/App";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+const router = createRouter({
+  routeTree,
+  basepath: "/form",
+});
+
+// 型補強（推奨）
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App>
+      <RouterProvider router={router} />
+    </App>
+  </React.StrictMode>
+);
