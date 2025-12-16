@@ -12,7 +12,19 @@ import { useFormData } from "../../../hooks/useFormData";
 import { SavedDataList } from "../../form/SavedDataList";
 import { CirclePlus, CircleX } from "lucide-react";
 
-export default function Form() {
+type FormProps = {
+  initialValues?: FormDataType;
+  onSubmit?: (data: FormDataType) => Promise<void> | void;
+  submitLabel?: string;
+  mode?: "create" | "edit";
+};
+
+export default function Form({
+  initialValues,
+  onSubmit,
+  submitLabel = "送信する",
+  mode = "create",
+}: FormProps) {
   const {
     data,
     setData,
@@ -25,14 +37,16 @@ export default function Form() {
     handleAddEmail,
     handleRemoveEmail,
     resetForm,
-  } = useFormData();
+  } = useFormData(initialValues);
 
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setEmailErrors([]);
+    setSubmitting(true);
 
     const validEmails = data.emails.filter((email) => email.trim() !== "");
     const formData = {
@@ -60,23 +74,30 @@ export default function Form() {
 
       setErrors(newErrors);
       setEmailErrors(newEmailErrors);
+      setSubmitting(false);
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/data", {
-        method: "POST",
-        headers: { "content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const result = await response.json();
+      if (onSubmit) {
+        await onSubmit(result.data);
+      } else {
+        const response = await fetch("http://localhost:3001/api/data", {
+          method: "POST",
+          headers: { "content-Type": "application/json" },
+          body: JSON.stringify(result.data),
+        });
+        const json = await response.json();
 
-      if (result.success) {
-        console.log("送信成功:", result.data);
-        resetForm();
+        if (json.success) {
+          console.log("送信成功:", json.data);
+          resetForm();
+        }
       }
     } catch (error) {
       console.error("送信エラー:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -110,7 +131,7 @@ export default function Form() {
 
   return (
     <div className="w-[400px] my-5 mx-auto">
-      <SavedDataList onLoadData={handleLoadData} />
+      {mode === "create" && <SavedDataList onLoadData={handleLoadData} />}
       <form className="max-w-full text-xl" onSubmit={handleSubmit}>
         {inputFields.map((inputField) => (
           <div key={inputField.id}>
@@ -262,12 +283,13 @@ export default function Form() {
 
         <button
           type="submit"
+          disabled={submitting}
           className="
             bg-neutral-50 hover:bg-neutral-200 transition-all
               text-lg w-50 px-8 py-4 border rounded-sm block mx-auto mt-2
             "
         >
-          送信する
+          {submitting ? "送信中..." : submitLabel}
         </button>
       </form>
     </div>

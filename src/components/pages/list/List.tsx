@@ -2,13 +2,16 @@ import { CircleX, RefreshCcw, Search, SquarePen } from "lucide-react";
 import { useMemo, useState } from "react";
 import { contractStatusLabelMap } from "../form/Form.constants";
 import useDataList from "../../../hooks/useDataList";
+import Form from "../form/Form";
+import { type FormDataType } from "../form/Form.schema";
 
 export default function List() {
-  const { dataList, error, fetchData, isLoading } = useDataList({
-    autoFetch: true,
-  });
+  const { dataList, error, fetchData, isLoading, isUpdating, updateData } =
+    useDataList({ autoFetch: true });
   const [searchTerm, setSearchTerm] = useState("");
-  // const [editingDataId, setEditingDataId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const filteredData = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -50,11 +53,40 @@ export default function List() {
     });
   }, [dataList, searchTerm]);
 
-  const editData = () => {
-    // 編集機能
+  const editingData = useMemo(
+    () => dataList.find((data) => data.id === editingId) ?? null,
+    [dataList, editingId]
+  );
+
+  const editingInitialValues: FormDataType | undefined = useMemo(() => {
+    if (!editingData) return undefined;
+    const { ...rest } = editingData;
+    return rest;
+  }, [editingData]);
+
+  const openEdit = (id: number) => {
+    setEditingId(id);
+    setIsEditOpen(true);
+    setUpdateError(null);
   };
 
-  // ローディング中
+  const closeEdit = () => {
+    setIsEditOpen(false);
+    setEditingId(null);
+    setUpdateError(null);
+  };
+
+  const handleUpdateSubmit = async (payload: FormDataType) => {
+    if (!editingData) return;
+    try {
+      await updateData(editingData.id, payload);
+      closeEdit();
+    } catch (err) {
+      console.error(err);
+      setUpdateError("更新に失敗しました。時間をおいて再度お試しください。");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-8">
@@ -207,7 +239,7 @@ export default function List() {
               </div>
               <button
                 type="button"
-                onClick={editData}
+                onClick={() => openEdit(data.id)}
                 className="group text-xs rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
               >
                 <SquarePen className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
@@ -222,6 +254,43 @@ export default function List() {
       <div className="mt-8 text-center text-sm text-gray-600">
         全 {filteredData.length} 件
       </div>
+
+      {/* 編集モーダル */}
+      {isEditOpen && editingData && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 overflow-y-auto"
+          onClick={closeEdit}
+        >
+          <div className="min-h-full flex items-center justify-center px-4 py-8">
+            <div
+              className="relative w-full max-w-3xl bg-white rounded-3xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 flex justify-end pb-2">
+                <button
+                  type="button"
+                  onClick={closeEdit}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <CircleX className="h-10 w-10" />
+                </button>
+              </div>
+              <h3 className="text-2xl font-semibold mb-4">
+                「{editingData.company}」を編集
+              </h3>
+              {updateError && (
+                <p className="text-red-500 text-sm mb-3">{updateError}</p>
+              )}
+              <Form
+                mode="edit"
+                initialValues={editingInitialValues}
+                onSubmit={handleUpdateSubmit}
+                submitLabel={isUpdating ? "更新中..." : "更新する"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

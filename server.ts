@@ -17,43 +17,46 @@ app.use(express.json());
 
 type FormDataDB = FormDataType & {
   id: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+const readDataFile = async (): Promise<FormDataDB[]> => {
+  try {
+    const fileContent = await fs.readFile(DATA_FILE, "utf-8");
+    return JSON.parse(fileContent);
+  } catch {
+    return [];
+  }
 };
 
 app.post("/api/data", async (req, res) => {
   try {
-    // 既存データを読み込み
-    let data: FormDataDB[] = [];
-    try {
-      const fileContent = await fs.readFile(DATA_FILE, "utf-8");
-      data = JSON.parse(fileContent);
-    } catch {
-      // ファイルが存在しない場合は空配列
-    }
+    const data = await readDataFile();
 
+    const now = new Date().toISOString();
     // IDを自動生成
-    const newData = {
+    const newData: FormDataDB = {
       id: Date.now(),
       ...req.body,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     data.push(newData);
 
     await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
 
-    res.json({ success: true, message: "送信完了！" });
+    res.json({ success: true, message: "送信完了！", data: newData });
   } catch (error) {
     console.error("保存エラー:", error);
     res.status(500).json({ success: false, error: "送信失敗..." });
   }
 });
 
-app.get("/api/data", async (req, res) => {
+app.get("/api/data", async (_req, res) => {
   try {
-    const fileContent = await fs.readFile(DATA_FILE, "utf-8");
-    const data = JSON.parse(fileContent);
+    const data = await readDataFile();
     res.json({ success: true, data });
   } catch (error) {
     console.error("読み込みエラー:", error);
@@ -63,4 +66,45 @@ app.get("/api/data", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+app.put("/api/data/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res
+      .status(400)
+      .json({ success: false, error: "不正なIDが指定されました" });
+  }
+
+  try {
+    // 読む
+    const data = await readDataFile();
+    // 探す
+    const index = data.findIndex((item) => item.id === id);
+
+    if (index === -1) {
+      return res
+        .status(404)
+        .json({ success: false, error: "データが見つかりません" });
+    }
+    // 特定・更新
+    const existing = data[index];
+    const updated: FormDataDB = {
+      ...existing,
+      ...req.body,
+      // 変更したくない値を既存値でさらに上書き
+      id,
+      createdAt: existing.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // 書く
+    data[index] = updated;
+    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("更新エラー:", error);
+    res.status(500).json({ success: false, error: "更新に失敗しました" });
+  }
 });
