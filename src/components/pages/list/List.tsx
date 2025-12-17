@@ -1,4 +1,4 @@
-import { CircleX, RefreshCcw, Search, SquarePen } from "lucide-react";
+import { CircleX, RefreshCcw, Search, SquarePen, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { contractStatusLabelMap } from "../form/Form.constants";
 import useDataList from "../../../hooks/useDataList";
@@ -6,12 +6,23 @@ import Form from "../form/Form";
 import { type FormDataType } from "../form/Form.schema";
 
 export default function List() {
-  const { dataList, error, fetchData, isLoading, isUpdating, updateData } =
-    useDataList({ autoFetch: true });
+  const {
+    dataList,
+    error,
+    isLoading,
+    isUpdating,
+    isDeleting,
+    fetchData,
+    updateData,
+    deleteData,
+  } = useDataList({ autoFetch: true });
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const filteredData = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
@@ -58,6 +69,11 @@ export default function List() {
     [dataList, editingId]
   );
 
+  const deletingData = useMemo(
+    () => dataList.find((data) => data.id === deletingId) ?? null,
+    [dataList, deletingId]
+  );
+
   const editingInitialValues: FormDataType | undefined = useMemo(() => {
     if (!editingData) return undefined;
     const { ...rest } = editingData;
@@ -75,6 +91,16 @@ export default function List() {
     setEditingId(null);
     setUpdateError(null);
   };
+  const openDelete = (id: number) => {
+    setDeletingId(id);
+    setIsDeleteOpen(true);
+    setDeleteError(null);
+  };
+  const closeDelete = () => {
+    setIsDeleteOpen(false);
+    setDeletingId(null);
+    setDeleteError(null);
+  };
 
   const handleUpdateSubmit = async (payload: FormDataType) => {
     if (!editingData) return;
@@ -84,6 +110,18 @@ export default function List() {
     } catch (err) {
       console.error(err);
       setUpdateError("更新に失敗しました。時間をおいて再度お試しください。");
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingId) return;
+
+    try {
+      await deleteData(deletingId);
+      closeDelete();
+    } catch (err) {
+      console.error(err);
+      setDeleteError("削除に失敗しました。時間をおいて再度お試しください。");
     }
   };
 
@@ -237,16 +275,28 @@ export default function List() {
               <div className="text-xs text-gray-600">
                 作成日: {new Date(data.createdAt).toLocaleString("ja-JP")}
               </div>
-              <button
-                type="button"
-                onClick={() => openEdit(data.id)}
-                className="group text-xs rounded-full mr-4 cursor-pointer hover:bg-gray-100 px-2 py-1"
-              >
-                <SquarePen className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
-                <span className="text-gray-500 group-hover:text-gray-600">
-                  編集
-                </span>
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => openEdit(data.id)}
+                  className="group text-xs rounded-full mr-2 cursor-pointer hover:bg-gray-100 px-2 py-1"
+                >
+                  <SquarePen className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
+                  <span className="text-gray-500 group-hover:text-gray-600">
+                    編集
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openDelete(data.id)}
+                  className="group text-xs rounded-full mr-2 cursor-pointer hover:bg-gray-100 px-2 py-1"
+                >
+                  <Trash2 className="inline-block h-4 w-4 text-gray-500 group-hover:text-gray-600" />
+                  <span className="text-gray-500 group-hover:text-gray-600">
+                    削除
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -287,6 +337,62 @@ export default function List() {
                 onSubmit={handleUpdateSubmit}
                 submitLabel={isUpdating ? "更新中..." : "更新する"}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeleteOpen && (
+        <div
+          className="fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto"
+          onClick={closeDelete}
+        >
+          <div className="min-h-full flex items-center justify-center px-4 py-8">
+            <div
+              className="relative w-full max-w-xl py-15 bg-white rounded-3xl shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-5 right-5 flex justify-end pb-2">
+                <button
+                  type="button"
+                  onClick={closeDelete}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <CircleX className="h-10 w-10" />
+                </button>
+              </div>
+              <Trash2 className="block h-20 w-20 p-5 mx-auto mb-10 text-rose-700 bg-red-100 rounded-full" />
+
+              <div className="w-100 mx-auto">
+                <h3 className="text-2xl font-bold mb-4 text-center">
+                  {deletingData && `"${deletingData.company}" を削除しますか？`}
+                </h3>
+                <p className="text-gray-500 text-sm mb-10  text-center">
+                  本当にこのデータを削除しますか？この操作は取り消しできません。
+                </p>
+                {deleteError && (
+                  <p className="text-red-500 text-sm text-center mb-5">
+                    {deleteError}
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={closeDelete}
+                  type="button"
+                  className="bg-neutral-50 hover:bg-neutral-100 text-gray-800 font-bold w-50 px-10 py-3 mr-5 rounded-xl border border-zinc-300"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="bg-red-700 hover:bg-red-600 disabled:bg-red-400 text-gray-50 font-bold w-50 px-10 py-3 rounded-xl border border-zinc-300"
+                >
+                  {isDeleting ? "削除中..." : "削除"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
