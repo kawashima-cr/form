@@ -13,13 +13,15 @@ export default function Header() {
   ];
 
   return (
-    <header className="w-full fixed top-0 border-b border-gray-400 bg-white ">
-      <nav className="w-100 h-15  mx-auto flex items-center justify-center text-center text-gray-600">
+    <header className="w-full fixed top-0 border-b border-gray-400 bg-neutral-50 ">
+      <nav className="w-100 h-15  mx-auto flex items-center justify-center text-center text-gray-600 transition-all">
         {Links.map((link) => (
           <Link
             to={link.path}
-            className="w-50 p-2 mx-2 "
-            activeProps={{ className: "font-bold text-gray-800" }}
+            className="w-50 p-2 mx-2  hover:font-semibold"
+            activeProps={{
+              className: "font-bold text-gray-800 border-b-2 border-indigo-600",
+            }}
           >
             {link.label}
           </Link>

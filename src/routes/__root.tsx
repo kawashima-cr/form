@@ -6,7 +6,7 @@ export const Route = createRootRoute({
   component: () => (
     <div>
       <Header />
-      <main className="pt-20 pb-5 max-w-7xl mx-auto">
+      <main className="pt-30 pb-15 max-w-7xl mx-auto">
         <Outlet />
       </main>
 
