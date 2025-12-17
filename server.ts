@@ -30,6 +30,15 @@ const readDataFile = async (): Promise<FormDataDB[]> => {
   }
 };
 
+// const validId = (req, res) => {
+//   const id = Number(req.params.id);
+//   if (Number.isNaN(id)) {
+//     return res
+//       .status(400)
+//       .json({ success: false, error: "不正なIDが指定されました" });
+//   }
+// }
+
 app.post("/api/data", async (req, res) => {
   try {
     const data = await readDataFile();
@@ -106,5 +115,33 @@ app.put("/api/data/:id", async (req, res) => {
   } catch (error) {
     console.error("更新エラー:", error);
     res.status(500).json({ success: false, error: "更新に失敗しました" });
+  }
+});
+
+app.delete("/api/data/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res
+      .status(400)
+      .json({ success: false, error: "不正なIDが指定されました" });
+  }
+
+  try {
+    const data = await readDataFile();
+    const index = data.findIndex((item) => item.id === id);
+    if (index === -1) {
+      return res
+        .status(404)
+        .json({ success: false, error: "データが見つかりません" });
+    }
+
+    const deleted = data[index];
+    data.splice(index, 1);
+    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+
+    res.json({ success: true, data: deleted });
+  } catch (error) {
+    console.error("削除エラー:", error);
+    res.status(500).json({ success: false, error: "削除に失敗しました" });
   }
 });

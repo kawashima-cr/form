@@ -17,6 +17,7 @@ export default function useDataList(options?: UseDataListOptions) {
   const [dataList, setDataList] = useState<SavedFormData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -67,6 +68,25 @@ export default function useDataList(options?: UseDataListOptions) {
     }
   }, []);
 
+  const deleteData = useCallback(async (id: number) => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/data/${id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "削除に失敗しました");
+      }
+
+      setDataList((prev) => prev.filter((item) => item.id !== id));
+      return result.data as SavedFormData;
+    } finally {
+      setIsDeleting(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (autoFetch) {
       fetchData();
@@ -77,8 +97,10 @@ export default function useDataList(options?: UseDataListOptions) {
     dataList,
     isLoading,
     isUpdating,
+    isDeleting,
     error,
     fetchData,
     updateData,
+    deleteData,
   };
 }
