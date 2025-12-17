@@ -130,7 +130,7 @@ export default function Form({
   };
 
   return (
-    <div className="w-[400px] my-5 mx-auto">
+    <div className="w-150 mx-auto bg-neutral-50 py-6 px-10 rounded-2xl">
       {mode === "create" && <SavedDataList onLoadData={handleLoadData} />}
       <form className="max-w-full text-xl" onSubmit={handleSubmit}>
         {inputFields.map((inputField) => (
@@ -225,7 +225,7 @@ export default function Form({
                   onClick={handleSearchAddress}
                   disabled={loading}
                   className="
-                    bg-neutral-50 hover:bg-neutral-200 transition-all
+                    bg-white hover:bg-neutral-200 transition-all
                     w-60 text-base px-5 py-2 border rounded-sm
                   "
                 >
@@ -285,7 +285,7 @@ export default function Form({
           type="submit"
           disabled={submitting}
           className="
-            bg-neutral-50 hover:bg-neutral-200 transition-all
+            bg-white hover:bg-neutral-200 transition-all
               text-lg w-50 px-8 py-4 border rounded-sm block mx-auto mt-2
             "
         >

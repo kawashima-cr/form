@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import "./App.css";
 
 export default function App({ children }: { children: ReactNode }) {
-  return <div className="min-h-dvh">{children}</div>;
+  return <div className="min-h-dvh bg-gray-200">{children}</div>;
 }
