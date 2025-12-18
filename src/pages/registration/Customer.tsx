@@ -1,28 +1,64 @@
 import { UserRoundPlus } from "lucide-react";
-// type CustomerFormData = {
-//   name: string;
-//   tel: string;
-//   postalCode: string;
-//   address: string;
-//   issueDate: string;
-//   expiryDate: string;
-//   notes: string;
-//   projectMemo: string;
-// };
+import { useState, type ChangeEvent, type FormEvent } from "react";
 
-// const customerFormData = {
-//   name: "",
-//   tel: "",
-//   postalCode: "",
-//   address: "",
-//   issueDate: "",
-//   expiryDate: "",
-//   notes: "",
-//   projectMemo: "",
-// };
+type CustomerFormData = {
+  name: string;
+  tel: string;
+  postalCode: string;
+  address: string;
+  issueDate: string;
+  expiryDate: string;
+  notes: string;
+  projectMemo: string;
+};
+
+const initialCustomerState: CustomerFormData = {
+  name: "",
+  tel: "",
+  postalCode: "",
+  address: "",
+  issueDate: "",
+  expiryDate: "",
+  notes: "",
+  projectMemo: "",
+};
 
 export function Customer() {
-  const handleSubmit = () => {};
+  const [formValues, setFormValues] =
+    useState<CustomerFormData>(initialCustomerState);
+  const [searchingAddress, setSearchingAddress] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+    try {
+      // TODO
+      console.log("送信データ:", formValues);
+    } catch (error) {
+      console.error("送信エラー：", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearchAddress = async () => {
+    setSearchingAddress(true);
+    try {
+      // TODO
+    } catch (error) {
+      console.error("住所検索エラー", error);
+    } finally {
+      setSearchingAddress(false);
+    }
+  };
+
   return (
     <div className="mx-10 text-slate-700">
       <div className="flex items-center gap-2 mb-3">
@@ -47,8 +83,8 @@ export function Customer() {
                   name="name"
                   id="name"
                   className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  // value={formValues.name}
-                  // onChange={handleChange}
+                  value={formValues.name}
+                  onChange={handleChange}
                   placeholder="山田 太郎"
                 />
               </div>
@@ -65,8 +101,8 @@ export function Customer() {
                   name="tel"
                   id="tel"
                   className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  // value={formValues.tel}
-                  // onChange={handleChange}
+                  value={formValues.tel}
+                  onChange={handleChange}
                   placeholder="090-1234-5678"
                 />
               </div>
@@ -85,19 +121,18 @@ export function Customer() {
                   name="postalCode"
                   type="text"
                   className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  // value={formValues.postalCode}
-                  // onChange={handleChange}
+                  value={formValues.postalCode}
+                  onChange={handleChange}
                   placeholder="1000001"
                   maxLength={8}
                 />
                 <button
                   type="button"
-                  // onClick={handleSearchAddress}
-                  // disabled={searchingAddress}
+                  onClick={handleSearchAddress}
+                  disabled={searchingAddress}
                   className="mt-1 w-full text-nowrap rounded-2xl border border-indigo-500 px-3 py-3 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-70 sm:w-48"
                 >
-                  郵便番号から検索
-                  {/* {searchingAddress ? "検索中..." : "郵便番号から検索"} */}
+                  {searchingAddress ? "検索中..." : "郵便番号から検索"}
                 </button>
               </div>
             </div>
@@ -114,8 +149,8 @@ export function Customer() {
               name="address"
               type="text"
               className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              // value={formValues.address}
-              // onChange={handleChange}
+              value={formValues.address}
+              onChange={handleChange}
               placeholder="東京都千代田区千代田1-1"
             />
           </div>
@@ -133,8 +168,8 @@ export function Customer() {
                 name="issueDate"
                 type="date"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                // value={formValues.issueDate}
-                // onChange={handleChange}
+                value={formValues.issueDate}
+                onChange={handleChange}
               />
             </div>
 
@@ -150,8 +185,8 @@ export function Customer() {
                 name="expiryDate"
                 type="date"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                // value={formValues.expiryDate}
-                // onChange={handleChange}
+                value={formValues.expiryDate}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -169,8 +204,8 @@ export function Customer() {
                 name="notes"
                 rows={3}
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                // value={formValues.notes}
-                // onChange={handleChange}
+                value={formValues.notes}
+                onChange={handleChange}
                 placeholder="その他共有事項を入力してください"
               />
             </div>
@@ -187,8 +222,8 @@ export function Customer() {
                 name="projectMemo"
                 rows={3}
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                // value={formValues.projectMemo}
-                // onChange={handleChange}
+                value={formValues.projectMemo}
+                onChange={handleChange}
                 placeholder="商談の背景や次回アクションを記録できます"
               />
             </div>
@@ -197,9 +232,9 @@ export function Customer() {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="rounded-md w-50 bg-indigo-600 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-200 transition-colors hover:bg-indigo-500"
+              className="rounded-md w-50 bg-indigo-600 px-8 py-3 text-base font-semibold text-slate-50 shadow-lg shadow-indigo-200 transition-colors hover:bg-indigo-500"
             >
-              登録する
+              {isLoading ? "登録中..." : "登録する"}
             </button>
           </div>
         </form>

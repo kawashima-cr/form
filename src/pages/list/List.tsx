@@ -1,7 +1,7 @@
 import { CircleX, RefreshCcw, Search, SquarePen, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { contractStatusLabelMap } from "../form/Form.constants";
-import useDataList from "../../../hooks/useDataList";
+import useDataList from "../../hooks/useDataList";
 import Form from "../form/Form";
 import { type FormDataType } from "../form/Form.schema";
 

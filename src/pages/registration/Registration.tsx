@@ -1,5 +1,5 @@
-import { Customer } from "../../registration/Customer";
-import { Product } from "../../registration/Product ";
+import { Customer } from "./Customer";
+import { Product } from "./Product ";
 
 export default function Registration() {
   return (

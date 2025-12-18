@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { FormDataType } from "../components/pages/form/Form.schema";
+import type { FormDataType } from "../pages/form/Form.schema";
 
 const emptyData: FormDataType = {
   company: "",

@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { TextInput } from "../../form/InputField";
+import { TextInput } from "../../components/form/InputField";
 import { formSchema, type FormDataType } from "./Form.schema";
 import {
   inputFields,
   prefectures,
   contractStatusOptions,
 } from "./Form.constants";
-import { fetchAddress } from "../../../api/postalCode";
-import { ErrorMessage } from "../../form/ErrorMessage";
-import { useFormData } from "../../../hooks/useFormData";
-import { SavedDataList } from "../../form/SavedDataList";
+import { fetchAddress } from "../../api/postalCode";
+import { ErrorMessage } from "../../components/form/ErrorMessage";
+import { useFormData } from "../../hooks/useFormData";
+import { SavedDataList } from "../../components/form/SavedDataList";
 import { CirclePlus, CircleX } from "lucide-react";
 
 type FormProps = {
