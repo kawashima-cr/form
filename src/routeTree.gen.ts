@@ -9,13 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegistrationRouteImport } from './routes/registration'
 import { Route as PostsRouteImport } from './routes/posts'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as FormRouteImport } from './routes/form'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
 
+const RegistrationRoute = RegistrationRouteImport.update({
+  id: '/registration',
+  path: '/registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsRoute = PostsRouteImport.update({
   id: '/posts',
   path: '/posts',
@@ -31,16 +35,6 @@ const FormRoute = FormRouteImport.update({
   path: '/form',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/$postId',
   path: '/$postId',
@@ -48,55 +42,57 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/form': typeof FormRoute
   '/list': typeof ListRoute
   '/posts': typeof PostsRouteWithChildren
+  '/registration': typeof RegistrationRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/form': typeof FormRoute
   '/list': typeof ListRoute
   '/posts': typeof PostsRouteWithChildren
+  '/registration': typeof RegistrationRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/form': typeof FormRoute
   '/list': typeof ListRoute
   '/posts': typeof PostsRouteWithChildren
+  '/registration': typeof RegistrationRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/form' | '/list' | '/posts' | '/posts/$postId'
+  fullPaths: '/form' | '/list' | '/posts' | '/registration' | '/posts/$postId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/form' | '/list' | '/posts' | '/posts/$postId'
+  to: '/form' | '/list' | '/posts' | '/registration' | '/posts/$postId'
   id:
     | '__root__'
-    | '/'
-    | '/about'
     | '/form'
     | '/list'
     | '/posts'
+    | '/registration'
     | '/posts/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   FormRoute: typeof FormRoute
   ListRoute: typeof ListRoute
   PostsRoute: typeof PostsRouteWithChildren
+  RegistrationRoute: typeof RegistrationRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/registration': {
+      id: '/registration'
+      path: '/registration'
+      fullPath: '/registration'
+      preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts': {
       id: '/posts'
       path: '/posts'
@@ -116,20 +112,6 @@ declare module '@tanstack/react-router' {
       path: '/form'
       fullPath: '/form'
       preLoaderRoute: typeof FormRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/$postId': {
@@ -153,11 +135,10 @@ const PostsRouteChildren: PostsRouteChildren = {
 const PostsRouteWithChildren = PostsRoute._addFileChildren(PostsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   FormRoute: FormRoute,
   ListRoute: ListRoute,
   PostsRoute: PostsRouteWithChildren,
+  RegistrationRoute: RegistrationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

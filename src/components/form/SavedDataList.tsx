@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FormDataType } from "../pages/form/Form.schema";
+import type { FormDataType } from "../../pages/form/Form.schema";
 import useDataList from "../../hooks/useDataList";
 import { FolderClosed, FolderSync, SquareX } from "lucide-react";
 
