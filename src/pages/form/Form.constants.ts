@@ -17,13 +17,15 @@ export const contractStatusOptions: ContractStatus[] = [
   { value: "cancellation", label: "解約" },
 ] as const;
 
-export const contractStatusLabelMap: Record<FormDataType["contractStatus"], string> =
-  {
-    contract: "契約中",
-    negotiation: "商談中",
-    cancellation: "解約",
-    initial: "未設定",
-  };
+export const contractStatusLabelMap: Record<
+  FormDataType["contractStatus"],
+  string
+> = {
+  contract: "契約中",
+  negotiation: "商談中",
+  cancellation: "解約",
+  initial: "未設定",
+};
 
 export const inputFields: InputField[] = [
   { label: "会社名", type: "text", name: "company", id: "company" },
