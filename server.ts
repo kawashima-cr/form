@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import fs from "fs/promises";
 import path from "path";
-import { FormDataType } from "./src/components/pages/form/Form.schema.js";
+import { FormDataType } from "./src/pages/form/Form.schema.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);

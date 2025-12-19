@@ -167,6 +167,8 @@ export function Customer() {
                 id="issueDate"
                 name="issueDate"
                 type="date"
+                min="1900-01-01"
+                max="2099-12-31"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 value={formValues.issueDate}
                 onChange={handleChange}
@@ -184,6 +186,8 @@ export function Customer() {
                 id="expiryDate"
                 name="expiryDate"
                 type="date"
+                min="1900-01-01"
+                max="2099-12-31"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 value={formValues.expiryDate}
                 onChange={handleChange}

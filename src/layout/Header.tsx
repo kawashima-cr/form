@@ -13,7 +13,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="w-full fixed top-0 border-b border-gray-400 bg-neutral-50 ">
+    <header className="w-full fixed top-0 border-b border-gray-300 bg-neutral-50 shadow-xl">
       <nav className="w-100 h-15  mx-auto flex items-center justify-center text-center text-gray-600 transition-all">
         {Links.map((link) => (
           <Link
