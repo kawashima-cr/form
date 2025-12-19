@@ -7,7 +7,7 @@ import App from "./app/App";
 
 const router = createRouter({
   routeTree,
-  basepath: "/form",
+  basepath: "/form/",
 });
 
 // 型補強（推奨）
