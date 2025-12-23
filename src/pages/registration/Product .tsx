@@ -1,7 +1,96 @@
-import { Calculator, LayoutList, PackagePlus } from "lucide-react";
-import { gridCols, LineItemRow } from "../../components/registration/LineItem";
+import {
+  Calculator,
+  CircleX,
+  LayoutList,
+  PackagePlus,
+  Search,
+} from "lucide-react";
+import { LineItemRow } from "../../components/registration/LineItem";
+import { useEffect, useState } from "react";
+import {
+  categoryOptions,
+  menuData,
+} from "../../components/registration/menuData";
+import type {
+  MenuCategory,
+  MenuDataType,
+} from "../../components/registration/menuData";
+const gridCols =
+  "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+export type LineItem = {
+  menuId: string | null;
+  qty: number;
+};
 
 export function Product() {
+  const ANIMATION_MS = 200;
+  const [lineItemsData, setLineItemsData] = useState<LineItem[]>(() =>
+    Array.from({ length: 1 }, () => ({ menuId: null, qty: 0 }))
+  );
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!isSearchOpen) {
+      return;
+    }
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isSearchOpen]);
+
+  const openSearch = () => {
+    setIsSearchOpen(true);
+    requestAnimationFrame(() => setIsSearchVisible(true));
+  };
+
+  const closeSearch = () => {
+    setIsSearchVisible(false);
+    setTimeout(() => {
+      setIsSearchOpen(false);
+    }, ANIMATION_MS);
+  };
+
+  const isEmptyRow = (row: LineItem) => row.menuId === null;
+
+  const handleSelectMenu = (menu: MenuDataType) => {
+    setLineItemsData((prev) => {
+      const emptyIndex = prev.findIndex(isEmptyRow);
+
+      const updated =
+        emptyIndex !== -1
+          ? prev.map((row, i) =>
+              i === emptyIndex ? { ...row, menuId: menu.id, qty: 1 } : row
+            )
+          : [...prev, { menuId: menu.id, qty: 1 }];
+
+      return [...updated, { menuId: null, qty: 0 }];
+    });
+
+    closeSearch();
+  };
+
+  const handleRemoveRow = (rowIndex: number) => {
+    setLineItemsData((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((_, i) => i !== rowIndex);
+    });
+  };
+
+  const filteredMenus = menuData.filter((menu) => {
+    if (selectedCategory && menu.category !== selectedCategory) return false;
+    const keyword = searchTerm.trim().toLocaleLowerCase();
+    if (!keyword) return true;
+    const result = menu.name.toLowerCase().includes(keyword);
+    return result;
+  });
+
   return (
     <div className="mx-10 mt-10 text-gray-700">
       <div className="flex items-center gap-2 mb-3">
@@ -19,15 +108,23 @@ export function Product() {
             </div>
             <div>
               <span className="block rounded-xl bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700">
-                3 件
+                {/* TODO 正確な件数の取得 */}
+                {lineItemsData.length - 1} 件
               </span>
             </div>
           </div>
-          <div>
-            <div
-              className={`text-center border-b border-gray-300 py-3 px-2 font-semibold bg-indigo-50 rounded-t-xl ${gridCols}`}
+          <div className="flex border-b border-gray-300 bg-indigo-100 rounded-t-xl">
+            <button
+              type="button"
+              onClick={openSearch}
+              className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-5 min-w-[50px]"
             >
-              <div className="">商品選択</div>
+              検索
+            </button>
+            <div
+              className={`flex-1 text-center py-3 px-2 font-semibold  ${gridCols}`}
+            >
+              <div className="pr-10">商品選択</div>
               <div className="">数量</div>
               <div className="">単位</div>
               <div className="">単価</div>
@@ -35,11 +132,113 @@ export function Product() {
               <div className="">削除</div>
             </div>
           </div>
+          {lineItemsData.map((item, index) => {
+            const menu = menuData.find((entry) => entry.id === item.menuId);
+            return (
+              <LineItemRow
+                key={index}
+                value={item}
+                menu={menu}
+                onChange={(next) => {
+                  setLineItemsData((prev) =>
+                    prev.map((row, i) => (i === index ? next : row))
+                  );
+                }}
+                onRemove={() => handleRemoveRow(index)}
+              />
+            );
+          })}
 
-          <LineItemRow />
-          <LineItemRow />
-          <LineItemRow />
-          <LineItemRow />
+          {isSearchOpen && (
+            <div
+              className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto transition-opacity duration-[${ANIMATION_MS}ms] ${
+                isSearchVisible ? "opacity-100" : "opacity-0"
+              }`}
+              onClick={closeSearch}
+            >
+              <div className="relative min-h-full flex items-center justify-center">
+                <div
+                  className={`absolute bottom-0 w-full h-[90vh] px-20 py-20 bg-slate-200 rounded-t-4xl shadow-lg overflow-y-auto [scrollbar-gutter: stable] transition-transform duration-[${ANIMATION_MS}ms] ${
+                    isSearchVisible ? "translate-y-0" : "translate-y-full"
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="absolute top-5 right-5 flex justify-end pb-2">
+                    <button
+                      type="button"
+                      onClick={closeSearch}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <CircleX className="h-10 w-10 text-red-400 hover:text-red-600 transition-colors" />
+                    </button>
+                  </div>
+                  {/* 検索バー */}
+                  <div className="mb-8 px-20">
+                    <form
+                      className="flex w-full items-center"
+                      onSubmit={(e) => e.preventDefault()}
+                    >
+                      <div className="relative flex-1">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          name="search"
+                          id="search"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          placeholder="メニュー名を検索"
+                          className="w-full rounded-xl border-2 border-gray-300 bg-white hover:bg-neutral-50 px-12 py-2 focus:outline-0"
+                        />
+                        {searchTerm && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchTerm("")}
+                          >
+                            <CircleX className="absolute right-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-500 hover:rotate-90 hover:scale-110 transition-all" />
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* カテゴリーフィルター */}
+                  <div className="flex flex-wrap justify-center gap-3 px-20 mb-10">
+                    {categoryOptions.map((option) => (
+                      <button
+                        key={option.value ?? "all"}
+                        type="button"
+                        onClick={() => setSelectedCategory(option.value)}
+                        className={`transition-colors rounded-full border px-4 py-2 text-sm font-semibold min-w-20 ${
+                          selectedCategory === option.value
+                            ? "bg-indigo-600 text-neutral-50"
+                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* メニュー一覧 */}
+                  <div className="grid grid-cols-4 gap-4">
+                    {filteredMenus.map((menu) => (
+                      <div
+                        onClick={() => handleSelectMenu(menu)}
+                        key={menu.id}
+                        id={menu.category}
+                        className="col-span-1 flex h-full flex-col min-h-36 px-3 py-4 bg-white border-2 hover:bg-gray-50 border-gray-300 rounded-2xl cursor-pointer"
+                      >
+                        <h3 className="text-lg font-bold pb-2">{menu.name}</h3>
+                        <p className="flex justify-end mt-auto border-t border-gray-100  pt-1 pr-2 text-indigo-700 text-lg font-bold">
+                          ￥{menu.price.toLocaleString("ja-JP")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 合計金額 */}

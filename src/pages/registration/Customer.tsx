@@ -1,21 +1,18 @@
 import { UserRoundPlus } from "lucide-react";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { prefectures } from "./Registration.constants";
+import {
+  RegistrationSchema,
+  type RegistrationSchemaType,
+} from "./Registration.schema";
+import { ErrorMessage } from "../../components/form/ErrorMessage";
+import { fetchAddress } from "../../api/postalCode";
 
-type CustomerFormData = {
-  name: string;
-  tel: string;
-  postalCode: string;
-  address: string;
-  issueDate: string;
-  expiryDate: string;
-  notes: string;
-  projectMemo: string;
-};
-
-const initialCustomerState: CustomerFormData = {
+const initialCustomerState: RegistrationSchemaType = {
   name: "",
   tel: "",
   postalCode: "",
+  prefecture: "",
   address: "",
   issueDate: "",
   expiryDate: "",
@@ -25,35 +22,89 @@ const initialCustomerState: CustomerFormData = {
 
 export function Customer() {
   const [formValues, setFormValues] =
-    useState<CustomerFormData>(initialCustomerState);
-  const [searchingAddress, setSearchingAddress] = useState<boolean>(false);
+    useState<RegistrationSchemaType>(initialCustomerState);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchingAddress, setSearchingAddress] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => {
+      if (!prev[name]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
   };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
+    setErrors({});
+    const validationResult = RegistrationSchema.safeParse(formValues);
+    if (!validationResult.success) {
+      const newErrors: Record<string, string> = {};
+      validationResult.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        newErrors[field] = issue.message;
+      });
+      setErrors(newErrors);
+      return;
+    }
+
     try {
-      // TODO
+      setIsLoading(true);
+      const response = await fetch("http://localhost:3001/api/data", {
+        method: "POST",
+        headers: { "content-Type": "application/json" },
+        body: JSON.stringify(formValues),
+      });
+      const json = await response.json();
+
+      if (json.success) {
+        console.log("送信成功:", json.data);
+        setFormValues(initialCustomerState);
+      }
       console.log("送信データ:", formValues);
     } catch (error) {
       console.error("送信エラー：", error);
+      setErrors((prev) => ({
+        ...prev,
+        postalCode: "住所の取得に失敗しました",
+      }));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSearchAddress = async () => {
-    setSearchingAddress(true);
     try {
-      // TODO
+      setSearchingAddress(true);
+      const result = await fetchAddress(formValues.postalCode);
+      if (result) {
+        setFormValues({
+          ...formValues,
+          prefecture: result.address1,
+          address: result.address2 + result.address3,
+        });
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.postalCode;
+          delete next.prefecture;
+          delete next.address;
+          return next;
+        });
+      }
     } catch (error) {
       console.error("住所検索エラー", error);
+      setErrors((prev) => ({
+        ...prev,
+        postalCode: "住所の取得に失敗しました",
+      }));
     } finally {
       setSearchingAddress(false);
     }
@@ -87,6 +138,7 @@ export function Customer() {
                   onChange={handleChange}
                   placeholder="山田 太郎"
                 />
+                <ErrorMessage message={errors.name} />
               </div>
 
               <div className="flex-1">
@@ -105,6 +157,7 @@ export function Customer() {
                   onChange={handleChange}
                   placeholder="090-1234-5678"
                 />
+                <ErrorMessage message={errors.tel} />
               </div>
             </div>
 
@@ -135,24 +188,51 @@ export function Customer() {
                   {searchingAddress ? "検索中..." : "郵便番号から検索"}
                 </button>
               </div>
+              <ErrorMessage message={errors.postalCode} />
             </div>
           </div>
-          <div>
-            <label
-              className="block text-sm font-medium text-gray-600"
-              htmlFor="address"
-            >
-              住所
-            </label>
-            <input
-              id="address"
-              name="address"
-              type="text"
-              className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={formValues.address}
-              onChange={handleChange}
-              placeholder="東京都千代田区千代田1-1"
-            />
+          <div className="grid grid-cols-4 gap-6">
+            <div className="mb-1">
+              <label
+                className="block text-sm font-medium text-gray-600"
+                htmlFor="prefecture"
+              >
+                都道府県
+              </label>
+              <select
+                className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                id="prefecture"
+                name="prefecture"
+                value={formValues.prefecture}
+                onChange={handleChange}
+              >
+                <option value="">-- 選択してください --</option>
+                {prefectures.map((prefecture) => (
+                  <option key={prefecture} value={prefecture}>
+                    {prefecture}
+                  </option>
+                ))}
+              </select>
+              <ErrorMessage message={errors.prefecture} />
+            </div>
+            <div className="col-span-3">
+              <label
+                className="block text-sm font-medium text-gray-600"
+                htmlFor="address"
+              >
+                住所
+              </label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                value={formValues.address}
+                onChange={handleChange}
+                placeholder="千代田区千代田1-1"
+              />
+              <ErrorMessage message={errors.address} />
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -167,10 +247,13 @@ export function Customer() {
                 id="issueDate"
                 name="issueDate"
                 type="date"
+                min="1900-01-01"
+                max="2099-12-31"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 value={formValues.issueDate}
                 onChange={handleChange}
               />
+              <ErrorMessage message={errors.issueDate} />
             </div>
 
             <div>
@@ -184,10 +267,13 @@ export function Customer() {
                 id="expiryDate"
                 name="expiryDate"
                 type="date"
+                min="1900-01-01"
+                max="2099-12-31"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-800 bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 value={formValues.expiryDate}
                 onChange={handleChange}
               />
+              <ErrorMessage message={errors.expiryDate} />
             </div>
           </div>
 
