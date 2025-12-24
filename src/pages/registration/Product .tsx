@@ -30,6 +30,7 @@ export function Product() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
     null
   );
@@ -58,6 +59,7 @@ export function Product() {
     setTimeout(() => {
       setIsSearchOpen(false);
     }, ANIMATION_MS);
+    setSearchTerm("");
   };
 
   const isEmptyRow = (row: LineItem) => row.menuId === null;
@@ -79,6 +81,11 @@ export function Product() {
     closeSearch();
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const handleRemoveRow = (rowIndex: number) => {
     setLineItemsData((prev) => {
       if (prev.length <= 1) return prev;
@@ -88,7 +95,7 @@ export function Product() {
 
   const filteredMenus = menuData.filter((menu) => {
     if (selectedCategory && menu.category !== selectedCategory) return false;
-    const keyword = searchTerm.trim().toLocaleLowerCase();
+    const keyword = debouncedSearchTerm.trim().toLocaleLowerCase();
     if (!keyword) return true;
     const result = menu.name.toLowerCase().includes(keyword);
     return result;
