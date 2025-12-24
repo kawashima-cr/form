@@ -33,6 +33,9 @@ export function Product() {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
     null
   );
+  const registeredRowCount = lineItemsData.filter(
+    (lineItem) => lineItem.menuId !== null
+  ).length;
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -108,8 +111,7 @@ export function Product() {
             </div>
             <div>
               <span className="block rounded-xl bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700">
-                {/* TODO 正確な件数の取得 */}
-                {lineItemsData.length - 1} 件
+                {registeredRowCount} 件
               </span>
             </div>
           </div>
