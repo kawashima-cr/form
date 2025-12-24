@@ -25,7 +25,7 @@ export const categoryOptions: Array<{
 
 export const menuData: MenuDataType[] = [
   {
-    id: "other-1",
+    id: "custom",
     category: "other",
     name: "その他（自分で入力）",
     price: 0,

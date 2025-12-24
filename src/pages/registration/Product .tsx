@@ -17,15 +17,25 @@ import type {
 } from "../../components/registration/menuData";
 const gridCols =
   "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+
 export type LineItem = {
   menuId: string | null;
+  name: string;
   qty: number;
+  unit: string;
+  unitPrice: number;
 };
 
 export function Product() {
   const ANIMATION_MS = 200;
   const [lineItemsData, setLineItemsData] = useState<LineItem[]>(() =>
-    Array.from({ length: 1 }, () => ({ menuId: null, qty: 0 }))
+    Array.from({ length: 1 }, () => ({
+      menuId: null,
+      name: "",
+      qty: 0,
+      unit: "",
+      unitPrice: 0,
+    }))
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -34,6 +44,7 @@ export function Product() {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
     null
   );
+
   const registeredRowCount = lineItemsData.filter(
     (lineItem) => lineItem.menuId !== null
   ).length;
@@ -67,15 +78,36 @@ export function Product() {
   const handleSelectMenu = (menu: MenuDataType) => {
     setLineItemsData((prev) => {
       const emptyIndex = prev.findIndex(isEmptyRow);
+      const nextRow =
+        menu.id === "custom"
+          ? {
+              menuId: menu.id,
+              name: "",
+              qty: 1,
+              unit: "",
+              unitPrice: 0,
+            }
+          : {
+              menuId: menu.id,
+              name: menu.name,
+              qty: 1,
+              unit: menu.unit,
+              unitPrice: menu.price,
+            };
+      const emptyRow = {
+        menuId: null,
+        name: "",
+        qty: 0,
+        unit: "",
+        unitPrice: 0,
+      };
 
       const updated =
         emptyIndex !== -1
-          ? prev.map((row, i) =>
-              i === emptyIndex ? { ...row, menuId: menu.id, qty: 1 } : row
-            )
-          : [...prev, { menuId: menu.id, qty: 1 }];
+          ? prev.map((row, i) => (i === emptyIndex ? nextRow : row))
+          : [...prev, nextRow];
 
-      return [...updated, { menuId: null, qty: 0 }];
+      return [...updated, emptyRow];
     });
 
     closeSearch();
@@ -141,18 +173,19 @@ export function Product() {
               <div className="">削除</div>
             </div>
           </div>
-          {lineItemsData.map((item, index) => {
-            const menu = menuData.find((entry) => entry.id === item.menuId);
+          {lineItemsData.map((lineItem, index) => {
+            const menu = menuData.find((entry) => entry.id === lineItem.menuId);
             return (
               <LineItemRow
                 key={index}
-                value={item}
+                value={lineItem}
                 menu={menu}
                 onChange={(next) => {
                   setLineItemsData((prev) =>
                     prev.map((row, i) => (i === index ? next : row))
                   );
                 }}
+                onNameClick={openSearch}
                 onRemove={() => handleRemoveRow(index)}
               />
             );
