@@ -46,10 +46,6 @@ export function Product() {
   );
   const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
 
-  const registeredRowCount = lineItemsData.filter(
-    (lineItem) => lineItem.menuId !== null
-  ).length;
-
   useEffect(() => {
     if (!isSearchOpen) {
       return;
@@ -147,6 +143,19 @@ export function Product() {
     const result = menu.name.toLowerCase().includes(keyword);
     return result;
   });
+
+  const registeredRowCount = lineItemsData.filter(
+    (lineItem) => lineItem.menuId !== null
+  ).length;
+
+  const subtotal = lineItemsData.reduce(
+    (sum, item) => sum + item.qty * item.unitPrice,
+    0
+  );
+
+  const consumptionTax = Math.floor(subtotal * 0.1);
+
+  const total = subtotal + consumptionTax;
 
   return (
     <div className="mx-10 mt-10 text-gray-700">
@@ -313,16 +322,20 @@ export function Product() {
           </div>
           <div className="flex items-center justify-between mb-5 text-slate-600 text-sm">
             <p>小計</p>
-            <span className="text-slate-800 font-semibold">￥110,000</span>
+            <span className="text-slate-800 font-semibold">
+              ￥{subtotal.toLocaleString("ja-JP")}
+            </span>
           </div>
           <div className="flex items-center justify-between text-slate-600 text-sm">
             <p>消費税（10%）</p>
-            <span className="text-slate-800 font-semibold">￥1,100</span>
+            <span className="text-slate-800 font-semibold">
+              ￥{consumptionTax.toLocaleString("ja-JP")}
+            </span>
           </div>
           <div className="flex items-center justify-between py-10 my-10 border-y border-gray-300">
             <h3 className="text-lg font-bold text-slate-800">合計</h3>
             <span className="text-3xl text-indigo-700 font-bold">
-              ￥111,100
+              ￥{total.toLocaleString("ja-JP")}
             </span>
           </div>
           <div className="">
