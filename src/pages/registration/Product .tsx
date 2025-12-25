@@ -44,6 +44,7 @@ export function Product() {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
     null
   );
+  const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
 
   const registeredRowCount = lineItemsData.filter(
     (lineItem) => lineItem.menuId !== null
@@ -71,13 +72,20 @@ export function Product() {
       setIsSearchOpen(false);
     }, ANIMATION_MS);
     setSearchTerm("");
+    setActiveRowIndex(null);
   };
-
-  const isEmptyRow = (row: LineItem) => row.menuId === null;
 
   const handleSelectMenu = (menu: MenuDataType) => {
     setLineItemsData((prev) => {
+      const isEmptyRow = (row: LineItem) => row.menuId === null;
       const emptyIndex = prev.findIndex(isEmptyRow);
+      const emptyRow = {
+        menuId: null,
+        name: "",
+        qty: 0,
+        unit: "",
+        unitPrice: 0,
+      };
       const nextRow =
         menu.id === "custom"
           ? {
@@ -94,13 +102,19 @@ export function Product() {
               unit: menu.unit,
               unitPrice: menu.price,
             };
-      const emptyRow = {
-        menuId: null,
-        name: "",
-        qty: 0,
-        unit: "",
-        unitPrice: 0,
-      };
+
+      if (activeRowIndex !== null) {
+        const updated = prev.map((row, i) =>
+          i === activeRowIndex ? nextRow : row
+        );
+
+        const wasEmpty = prev[activeRowIndex]?.menuId === null;
+        if (wasEmpty) {
+          return [...updated, emptyRow];
+        } else {
+          return updated;
+        }
+      }
 
       const updated =
         emptyIndex !== -1
@@ -123,6 +137,7 @@ export function Product() {
       if (prev.length <= 1) return prev;
       return prev.filter((_, i) => i !== rowIndex);
     });
+    setActiveRowIndex(null);
   };
 
   const filteredMenus = menuData.filter((menu) => {
@@ -157,7 +172,7 @@ export function Product() {
           <div className="flex border-b border-gray-300 bg-indigo-100 rounded-t-xl">
             <button
               type="button"
-              onClick={openSearch}
+              onClick={() => openSearch()}
               className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-5 min-w-[50px]"
             >
               検索
@@ -185,7 +200,14 @@ export function Product() {
                     prev.map((row, i) => (i === index ? next : row))
                   );
                 }}
-                onNameClick={openSearch}
+                onNameClick={
+                  lineItem.menuId === "custom"
+                    ? undefined
+                    : () => {
+                        setActiveRowIndex(index);
+                        openSearch();
+                      }
+                }
                 onRemove={() => handleRemoveRow(index)}
               />
             );

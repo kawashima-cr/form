@@ -9,7 +9,7 @@ type LineItemRowProps = {
   onChange: (next: LineItem) => void;
   value: LineItem;
   menu?: MenuDataType;
-  onNameClick: React.MouseEventHandler<HTMLInputElement>;
+  onNameClick?: React.MouseEventHandler<HTMLInputElement>;
   onRemove: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -99,15 +99,11 @@ export function LineItemRow(props: LineItemRowProps) {
           <input
             id="unitPrice"
             name="unitPrice"
-            type="text"
+            type="number"
             className={`w-full rounded-2xl border p-3 focus:outline-none ${textInputBorderClass}`}
-            value={
-              isCustom
-                ? String(props.value.unitPrice)
-                : props.value.unitPrice.toLocaleString("ja-JP")
-            }
+            value={props.value.unitPrice}
             readOnly={props.value.menuId !== "custom"}
-            placeholder="5,000"
+            placeholder="5000"
             onChange={handleUnitPriceChange}
           />
         </div>
