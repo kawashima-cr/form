@@ -215,7 +215,7 @@ export function Product() {
 
           {isSearchOpen && (
             <div
-              className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto transition-opacity duration-[${ANIMATION_MS}ms] ${
+              className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-opacity duration-[${ANIMATION_MS}ms] ${
                 isSearchVisible ? "opacity-100" : "opacity-0"
               }`}
               onClick={closeSearch}
