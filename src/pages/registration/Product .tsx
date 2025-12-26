@@ -184,7 +184,7 @@ export function Product() {
               onClick={() => openSearch()}
               className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-5 min-w-[50px]"
             >
-              検索
+              追加
             </button>
             <div
               className={`flex-1 text-center py-3 px-2 font-semibold  ${gridCols}`}
