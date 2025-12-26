@@ -17,22 +17,34 @@ import type {
 } from "../../components/registration/menuData";
 const gridCols =
   "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+
 export type LineItem = {
   menuId: string | null;
+  name: string;
   qty: number;
+  unit: string;
+  unitPrice: number;
 };
 
 export function Product() {
   const ANIMATION_MS = 200;
   const [lineItemsData, setLineItemsData] = useState<LineItem[]>(() =>
-    Array.from({ length: 1 }, () => ({ menuId: null, qty: 0 }))
+    Array.from({ length: 1 }, () => ({
+      menuId: null,
+      name: "",
+      qty: 0,
+      unit: "",
+      unitPrice: 0,
+    }))
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
     null
   );
+  const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -55,41 +67,95 @@ export function Product() {
     setTimeout(() => {
       setIsSearchOpen(false);
     }, ANIMATION_MS);
+    setSearchTerm("");
+    setActiveRowIndex(null);
   };
-
-  const isEmptyRow = (row: LineItem) => row.menuId === null;
 
   const handleSelectMenu = (menu: MenuDataType) => {
     setLineItemsData((prev) => {
+      const isEmptyRow = (row: LineItem) => row.menuId === null;
       const emptyIndex = prev.findIndex(isEmptyRow);
+      const emptyRow = {
+        menuId: null,
+        name: "",
+        qty: 0,
+        unit: "",
+        unitPrice: 0,
+      };
+      const nextRow =
+        menu.id === "custom"
+          ? {
+              menuId: menu.id,
+              name: "",
+              qty: 1,
+              unit: "",
+              unitPrice: 0,
+            }
+          : {
+              menuId: menu.id,
+              name: menu.name,
+              qty: 1,
+              unit: menu.unit,
+              unitPrice: menu.price,
+            };
+
+      if (activeRowIndex !== null) {
+        const updated = prev.map((row, i) =>
+          i === activeRowIndex ? nextRow : row
+        );
+
+        const wasEmpty = prev[activeRowIndex]?.menuId === null;
+        if (wasEmpty) {
+          return [...updated, emptyRow];
+        } else {
+          return updated;
+        }
+      }
 
       const updated =
         emptyIndex !== -1
-          ? prev.map((row, i) =>
-              i === emptyIndex ? { ...row, menuId: menu.id, qty: 1 } : row
-            )
-          : [...prev, { menuId: menu.id, qty: 1 }];
+          ? prev.map((row, i) => (i === emptyIndex ? nextRow : row))
+          : [...prev, nextRow];
 
-      return [...updated, { menuId: null, qty: 0 }];
+      return [...updated, emptyRow];
     });
 
     closeSearch();
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handleRemoveRow = (rowIndex: number) => {
     setLineItemsData((prev) => {
       if (prev.length <= 1) return prev;
       return prev.filter((_, i) => i !== rowIndex);
     });
+    setActiveRowIndex(null);
   };
 
   const filteredMenus = menuData.filter((menu) => {
     if (selectedCategory && menu.category !== selectedCategory) return false;
-    const keyword = searchTerm.trim().toLocaleLowerCase();
+    const keyword = debouncedSearchTerm.trim().toLocaleLowerCase();
     if (!keyword) return true;
     const result = menu.name.toLowerCase().includes(keyword);
     return result;
   });
+
+  const registeredRowCount = lineItemsData.filter(
+    (lineItem) => lineItem.menuId !== null
+  ).length;
+
+  const subtotal = lineItemsData.reduce(
+    (sum, item) => sum + item.qty * item.unitPrice,
+    0
+  );
+
+  const consumptionTax = Math.floor(subtotal * 0.1);
+
+  const total = subtotal + consumptionTax;
 
   return (
     <div className="mx-10 mt-10 text-gray-700">
@@ -108,18 +174,17 @@ export function Product() {
             </div>
             <div>
               <span className="block rounded-xl bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700">
-                {/* TODO 正確な件数の取得 */}
-                {lineItemsData.length - 1} 件
+                {registeredRowCount} 件
               </span>
             </div>
           </div>
           <div className="flex border-b border-gray-300 bg-indigo-100 rounded-t-xl">
             <button
               type="button"
-              onClick={openSearch}
+              onClick={() => openSearch()}
               className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-5 min-w-[50px]"
             >
-              検索
+              追加
             </button>
             <div
               className={`flex-1 text-center py-3 px-2 font-semibold  ${gridCols}`}
@@ -132,18 +197,26 @@ export function Product() {
               <div className="">削除</div>
             </div>
           </div>
-          {lineItemsData.map((item, index) => {
-            const menu = menuData.find((entry) => entry.id === item.menuId);
+          {lineItemsData.map((lineItem, index) => {
+            const menu = menuData.find((entry) => entry.id === lineItem.menuId);
             return (
               <LineItemRow
                 key={index}
-                value={item}
+                value={lineItem}
                 menu={menu}
                 onChange={(next) => {
                   setLineItemsData((prev) =>
                     prev.map((row, i) => (i === index ? next : row))
                   );
                 }}
+                onNameClick={
+                  lineItem.menuId === "custom"
+                    ? undefined
+                    : () => {
+                        setActiveRowIndex(index);
+                        openSearch();
+                      }
+                }
                 onRemove={() => handleRemoveRow(index)}
               />
             );
@@ -151,7 +224,7 @@ export function Product() {
 
           {isSearchOpen && (
             <div
-              className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto transition-opacity duration-[${ANIMATION_MS}ms] ${
+              className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-opacity duration-[${ANIMATION_MS}ms] ${
                 isSearchVisible ? "opacity-100" : "opacity-0"
               }`}
               onClick={closeSearch}
@@ -249,16 +322,20 @@ export function Product() {
           </div>
           <div className="flex items-center justify-between mb-5 text-slate-600 text-sm">
             <p>小計</p>
-            <span className="text-slate-800 font-semibold">￥110,000</span>
+            <span className="text-slate-800 font-semibold">
+              ￥{subtotal.toLocaleString("ja-JP")}
+            </span>
           </div>
           <div className="flex items-center justify-between text-slate-600 text-sm">
             <p>消費税（10%）</p>
-            <span className="text-slate-800 font-semibold">￥1,100</span>
+            <span className="text-slate-800 font-semibold">
+              ￥{consumptionTax.toLocaleString("ja-JP")}
+            </span>
           </div>
           <div className="flex items-center justify-between py-10 my-10 border-y border-gray-300">
             <h3 className="text-lg font-bold text-slate-800">合計</h3>
             <span className="text-3xl text-indigo-700 font-bold">
-              ￥111,100
+              ￥{total.toLocaleString("ja-JP")}
             </span>
           </div>
           <div className="">

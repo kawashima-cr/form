@@ -118,7 +118,7 @@ export function Customer() {
       </div>
       <div className="rounded-3xl p-10 bg-neutral-50 ">
         <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="flex gap-6">
+          <div className="flex gap-6 mb-0">
             <div className="flex gap-6 flex-1">
               <div className="flex-1">
                 <label
@@ -191,7 +191,7 @@ export function Customer() {
               <ErrorMessage message={errors.postalCode} />
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-6 mb-0">
             <div className="mb-1">
               <label
                 className="block text-sm font-medium text-gray-600"
@@ -235,7 +235,7 @@ export function Customer() {
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2  mb-0">
             <div>
               <label
                 className="block text-sm font-medium text-gray-600"
@@ -277,7 +277,7 @@ export function Customer() {
             </div>
           </div>
 
-          <div className="flex  gap-6">
+          <div className="flex gap-6 ">
             <div className="flex-1">
               <label
                 className="block text-sm font-medium text-gray-600"
