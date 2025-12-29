@@ -6,7 +6,7 @@ import {
   Search,
 } from "lucide-react";
 import { LineItemRow } from "../../components/registration/LineItem";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   categoryOptions,
   menuData,
@@ -15,8 +15,7 @@ import type {
   MenuCategory,
   MenuDataType,
 } from "../../components/registration/menuData";
-const gridCols =
-  "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+import { ErrorMessage } from "../../components/form/ErrorMessage";
 
 export type LineItem = {
   menuId: string | null;
@@ -25,6 +24,8 @@ export type LineItem = {
   unit: string;
   unitPrice: number;
 };
+type ActionState = { success: boolean; message: string };
+const initialState: ActionState = { success: false, message: "" };
 
 export function Product() {
   const ANIMATION_MS = 200;
@@ -45,6 +46,10 @@ export function Product() {
     null
   );
   const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -148,14 +153,63 @@ export function Product() {
     (lineItem) => lineItem.menuId !== null
   ).length;
 
+  const submitItems = lineItemsData
+    .filter((row) => row.menuId !== null)
+    .map((row) => ({ ...row, amount: row.qty * row.unitPrice }));
+
   const subtotal = lineItemsData.reduce(
     (sum, item) => sum + item.qty * item.unitPrice,
     0
   );
 
-  const consumptionTax = Math.floor(subtotal * 0.1);
+  const tax = Math.floor(subtotal * 0.1);
 
-  const total = subtotal + consumptionTax;
+  const total = subtotal + tax;
+
+  const gridCols =
+    "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+
+  const submit = async (
+    _prevState: ActionState,
+    _formData: FormData
+  ): Promise<ActionState> => {
+    try {
+      if (submitItems.length === 0) {
+        const message = "商品が選択されていません";
+        setFeedback({ type: "error", message });
+        return { success: false, message };
+      }
+
+      const payload = {
+        items: submitItems,
+        subtotal,
+        tax,
+        total,
+        createdAt: new Date().toISOString(),
+      };
+
+      const response = await fetch("http://localhost:3002/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const message = "送信エラー";
+        setFeedback({ type: "error", message });
+        return { success: false, message };
+      }
+      setFeedback({ type: "success", message: "登録完了" });
+
+      return { success: true, message: "登録完了" };
+    } catch {
+      const message = "サーバーエラーが発生しました";
+      setFeedback({ type: "error", message });
+      return { success: false, message };
+    }
+  };
+
+  const [, formAction, isPending] = useActionState(submit, initialState);
 
   return (
     <div className="mx-10 mt-10 text-gray-700">
@@ -164,7 +218,11 @@ export function Product() {
         <h2 className="text-2xl font-bold text-slate-800">商品登録</h2>
       </div>
 
-      <div className="text-slate-700 grid grid-cols-12 gap-6">
+      <form
+        action={formAction}
+        className="text-slate-700 grid grid-cols-12 gap-6"
+        onSubmit={() => setFeedback(null)}
+      >
         {/* 商品検索 */}
         <div className="col-span-9 rounded-3xl py-10 px-5 bg-neutral-50">
           <div className="flex justify-between">
@@ -247,10 +305,7 @@ export function Product() {
                   </div>
                   {/* 検索バー */}
                   <div className="mb-8 px-20">
-                    <form
-                      className="flex w-full items-center"
-                      onSubmit={(e) => e.preventDefault()}
-                    >
+                    <div className="flex w-full items-center">
                       <div className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
                         <input
@@ -271,7 +326,7 @@ export function Product() {
                           </button>
                         )}
                       </div>
-                    </form>
+                    </div>
                   </div>
 
                   {/* カテゴリーフィルター */}
@@ -329,7 +384,7 @@ export function Product() {
           <div className="flex items-center justify-between text-slate-600 text-sm">
             <p>消費税（10%）</p>
             <span className="text-slate-800 font-semibold">
-              ￥{consumptionTax.toLocaleString("ja-JP")}
+              ￥{tax.toLocaleString("ja-JP")}
             </span>
           </div>
           <div className="flex items-center justify-between py-10 my-10 border-y border-gray-300">
@@ -341,13 +396,25 @@ export function Product() {
           <div className="">
             <button
               type="submit"
+              disabled={isPending}
               className="w-full rounded-md bg-indigo-600 px-8 py-3 text-base font-semibold text-slate-50 shadow-lg shadow-indigo-200 transition-colors hover:bg-indigo-500"
             >
-              登録する
+              {isPending ? "送信中..." : "登録する"}
             </button>
+            {feedback?.type === "error" && (
+              <ErrorMessage
+                message={feedback.message}
+                className="mt-2 text-sm font-semibold"
+              />
+            )}
+            {feedback?.type === "success" && (
+              <p className="mt-2 text-sm font-semibold text-emerald-600">
+                {feedback.message}
+              </p>
+            )}
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

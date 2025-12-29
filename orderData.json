@@ -1,0 +1,114 @@
+[
+  {
+    "items": [
+      {
+        "menuId": "wm-1",
+        "name": "洗濯機／縦型",
+        "qty": 1,
+        "unit": "機",
+        "unitPrice": 8800,
+        "amount": 8800
+      }
+    ],
+    "subtotal": 8800,
+    "tax": 880,
+    "total": 9680,
+    "createdAt": "2025-12-29T07:41:07.024Z"
+  },
+  {
+    "items": [
+      {
+        "menuId": "wm-1",
+        "name": "洗濯機／縦型",
+        "qty": 1,
+        "unit": "機",
+        "unitPrice": 8800,
+        "amount": 8800
+      },
+      {
+        "menuId": "custom",
+        "name": "",
+        "qty": 1,
+        "unit": "",
+        "unitPrice": 0,
+        "amount": 0
+      }
+    ],
+    "subtotal": 8800,
+    "tax": 880,
+    "total": 9680,
+    "createdAt": "2025-12-29T07:41:09.966Z"
+  },
+  {
+    "items": [
+      {
+        "menuId": "custom",
+        "name": "",
+        "qty": 1,
+        "unit": "",
+        "unitPrice": 0,
+        "amount": 0
+      }
+    ],
+    "subtotal": 0,
+    "tax": 0,
+    "total": 0,
+    "createdAt": "2025-12-29T07:41:22.112Z"
+  },
+  {
+    "items": [
+      {
+        "menuId": "wm-1",
+        "name": "洗濯機／縦型",
+        "qty": 2,
+        "unit": "機",
+        "unitPrice": 8800,
+        "amount": 17600
+      }
+    ],
+    "subtotal": 17600,
+    "tax": 1760,
+    "total": 19360,
+    "createdAt": "2025-12-29T07:41:57.241Z"
+  },
+  {
+    "items": [
+      {
+        "menuId": "wm-1",
+        "name": "洗濯機／縦型",
+        "qty": 2,
+        "unit": "機",
+        "unitPrice": 8800,
+        "amount": 17600
+      },
+      {
+        "menuId": "floor-2",
+        "name": "床／カーペット洗浄",
+        "qty": 10,
+        "unit": "㎡",
+        "unitPrice": 770,
+        "amount": 7700
+      }
+    ],
+    "subtotal": 25300,
+    "tax": 2530,
+    "total": 27830,
+    "createdAt": "2025-12-29T07:42:19.580Z"
+  },
+  {
+    "items": [
+      {
+        "menuId": "floor-3",
+        "name": "床／剥離サービス",
+        "qty": 1,
+        "unit": "㎡",
+        "unitPrice": 1100,
+        "amount": 1100
+      }
+    ],
+    "subtotal": 1100,
+    "tax": 110,
+    "total": 1210,
+    "createdAt": "2025-12-29T07:45:34.651Z"
+  }
+]

@@ -73,10 +73,6 @@ app.get("/api/data", async (_req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 app.put("/api/data/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
@@ -144,4 +140,8 @@ app.delete("/api/data/:id", async (req, res) => {
     console.error("削除エラー:", error);
     res.status(500).json({ success: false, error: "削除に失敗しました" });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
