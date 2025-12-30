@@ -16,6 +16,7 @@ import type {
   MenuDataType,
 } from "../../components/registration/menuData";
 import { ErrorMessage } from "../../components/form/ErrorMessage";
+import { Switch } from "@/components/ui/switch";
 
 export type LineItem = {
   menuId: string | null;
@@ -50,6 +51,7 @@ export function Product() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [taxRate, setTaxRate] = useState<8 | 10>(10);
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -162,7 +164,7 @@ export function Product() {
     0
   );
 
-  const tax = Math.floor(subtotal * 0.1);
+  const tax = Math.floor(subtotal * (taxRate * 0.01));
 
   const total = subtotal + tax;
 
@@ -224,7 +226,7 @@ export function Product() {
         onSubmit={() => setFeedback(null)}
       >
         {/* 商品検索 */}
-        <div className="col-span-9 rounded-3xl py-10 px-5 bg-neutral-50">
+        <div className="xl:col-span-9 col-span-12 rounded-3xl py-10 px-5 bg-neutral-50">
           <div className="flex justify-between">
             <div className="flex items-center gap-2 mb-7">
               <LayoutList className="pointer-events-none rounded-lg h-7 w-7 p-1 text-neutral-100 bg-indigo-500" />
@@ -240,7 +242,7 @@ export function Product() {
             <button
               type="button"
               onClick={() => openSearch()}
-              className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-5 min-w-[50px]"
+              className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-3 w-20 text-nowrap"
             >
               追加
             </button>
@@ -382,7 +384,14 @@ export function Product() {
             </span>
           </div>
           <div className="flex items-center justify-between text-slate-600 text-sm">
-            <p>消費税（10%）</p>
+            <p className="flex items-center">
+              消費税
+              <Switch
+                checked={taxRate === 10}
+                onCheckedChange={(checked) => setTaxRate(checked ? 10 : 8)}
+                className="ml-4"
+              />
+            </p>
             <span className="text-slate-800 font-semibold">
               ￥{tax.toLocaleString("ja-JP")}
             </span>

@@ -57,7 +57,9 @@ export function LineItemRow(props: LineItemRowProps) {
   const hideNumberSpinClass = isCustom
     ? "appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
     : "";
-  const nameHoverClass = isCustom ? "" : "hover:bg-gray-100 hover:text-indigo-600";
+  const nameHoverClass = isCustom
+    ? ""
+    : "hover:bg-gray-100 hover:text-indigo-600";
 
   const unitPrice = props.value.unitPrice;
   const amount = unitPrice * props.value.qty;
