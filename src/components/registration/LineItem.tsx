@@ -42,7 +42,7 @@ export function LineItemRow(props: LineItemRowProps) {
     });
   };
   const gridCols =
-    "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
   const isCustom = props.value.menuId === "custom";
   const isNameEmpty = props.value.name.trim() === "";
   const baseInputClass =
@@ -67,9 +67,12 @@ export function LineItemRow(props: LineItemRowProps) {
   return (
     <div>
       <div
-        className={`${gridCols} items-center border-b border-gray-300 py-3 px-2`}
+        className={`${gridCols} flex flex-col gap-3 border-b border-gray-300 px-2 py-3 lg:items-center`}
       >
-        <div className="flex">
+        <div className="flex w-full flex-col gap-1">
+          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+            商品選択
+          </span>
           <input
             id="name"
             name="name"
@@ -81,57 +84,76 @@ export function LineItemRow(props: LineItemRowProps) {
             onClick={props.onNameClick}
           />
         </div>
-        <div className="">
+        <div className="flex w-full gap-3 lg:contents">
+          <div className="flex w-full flex-1 flex-col gap-1">
+          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+            数量
+          </span>
           <input
             id="qty"
             name="qty"
             type="number"
-            className={`${baseInputClass} p-3 text-zinc-800 ${qtyInputBorderClass}`}
+            className={`${baseInputClass} py-3 px-2 text-zinc-800 ${qtyInputBorderClass}`}
             value={props.value.qty === 0 ? "" : props.value.qty}
             onChange={handleQtyChange}
             readOnly={!isCustom && isNameEmpty}
           />
-        </div>
-        <div className="">
+          </div>
+          <div className="flex w-full flex-1 flex-col gap-1">
+          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+            単位
+          </span>
           <input
             id="unit"
             name="unit"
             type="text"
-            className={`${baseInputClass} p-3 ${textInputBorderClass} ${editableCursorClass}`}
+            className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass}`}
             value={props.value.unit}
             readOnly={props.value.menuId !== "custom"}
             onChange={handleUnitChange}
           />
+          </div>
         </div>
-        <div className="">
+        <div className="flex w-full gap-3 lg:contents">
+          <div className="flex w-full flex-1 flex-col gap-1">
+          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+            単価
+          </span>
           <input
             id="unitPrice"
             name="unitPrice"
             type="number"
-            className={`${baseInputClass} p-3 ${textInputBorderClass} ${editableCursorClass} ${hideNumberSpinClass}`}
+            className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass} ${hideNumberSpinClass}`}
             value={props.value.unitPrice}
             readOnly={props.value.menuId !== "custom"}
             onChange={handleUnitPriceChange}
           />
-        </div>
-        <div className="">
+          </div>
+          <div className="flex w-full flex-1 flex-col gap-1">
+          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+            金額
+          </span>
           <input
             id="amount"
             name="amount"
             type="text"
-            className={`${baseInputClass} border-zinc-300 p-3 text-zinc-600`}
+            className={`${baseInputClass} border-zinc-300 py-3 px-2 text-zinc-600`}
             value={amount.toLocaleString("ja-JP")}
             readOnly
           />
         </div>
-        <div className="">
-          <button
-            onClick={props.onRemove}
-            type="button"
-            className="cursor-pointer flex items-center"
-          >
-            <Trash2 className="w-10 h-10 p-2 text-slate-500 rounded-xl hover:bg-gray-200 transition-all" />
-          </button>
+        <div className="flex w-full flex-1 flex-col items-end gap-1 lg:items-center">
+          <span className="px-2 text-right text-xs font-semibold text-slate-500 lg:hidden">
+            削除
+          </span>
+            <button
+              onClick={props.onRemove}
+              type="button"
+              className="mt-auto flex items-center"
+            >
+              <Trash2 className="h-10 w-10 rounded-xl p-2 text-slate-500 transition-all hover:bg-gray-200" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

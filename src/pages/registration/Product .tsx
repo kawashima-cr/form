@@ -169,7 +169,7 @@ export function Product() {
   const total = subtotal + tax;
 
   const gridCols =
-    "grid gap-3 grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
 
   const submit = async (
     _prevState: ActionState,
@@ -214,7 +214,7 @@ export function Product() {
   const [, formAction, isPending] = useActionState(submit, initialState);
 
   return (
-    <div className="mx-10 mt-10 text-gray-700">
+    <div className="mx-4 mt-6 text-gray-700 sm:mx-6 sm:mt-8 lg:mx-10 lg:mt-10">
       <div className="flex items-center gap-2 mb-3">
         <PackagePlus className="pointer-events-none rounded-full h-9 w-9 p-2 text-neutral-100 bg-indigo-500" />
         <h2 className="text-2xl font-bold text-slate-800">商品登録</h2>
@@ -222,11 +222,11 @@ export function Product() {
 
       <form
         action={formAction}
-        className="text-slate-700 grid grid-cols-12 gap-6"
+        className="grid grid-cols-1 gap-6 text-slate-700 xl:grid-cols-12"
         onSubmit={() => setFeedback(null)}
       >
         {/* 商品検索 */}
-        <div className="xl:col-span-9 col-span-12 rounded-3xl py-10 px-5 bg-neutral-50">
+        <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 pb-30 sm:pt-8 xl:col-span-9 xl:py-10">
           <div className="flex justify-between">
             <div className="flex items-center gap-2 mb-7">
               <LayoutList className="pointer-events-none rounded-lg h-7 w-7 p-1 text-neutral-100 bg-indigo-500" />
@@ -238,23 +238,25 @@ export function Product() {
               </span>
             </div>
           </div>
-          <div className="flex border-b border-gray-300 bg-indigo-100 rounded-t-xl">
+          <div className="flex flex-col gap-2 rounded-t-xl border-b border-gray-300 bg-indigo-100 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={() => openSearch()}
-              className="bg-indigo-600 hover:bg-indigo-500 text-slate-50 font-semibold rounded-xl py-2 px-3 w-20 text-nowrap"
+              className="w-full rounded-xl bg-indigo-600 px-3 py-2 font-semibold text-slate-50 hover:bg-indigo-500 sm:w-20"
             >
               追加
             </button>
-            <div
-              className={`flex-1 text-center py-3 px-2 font-semibold  ${gridCols}`}
-            >
-              <div className="pr-10">商品選択</div>
-              <div className="">数量</div>
-              <div className="">単位</div>
-              <div className="">単価</div>
-              <div className="">金額</div>
-              <div className="">削除</div>
+            <div className="hidden w-full lg:block">
+              <div
+                className={`flex-1 text-center py-3 px-2 font-semibold ${gridCols}`}
+              >
+                <div className="pr-10">商品選択</div>
+                <div className="">数量</div>
+                <div className="">単位</div>
+                <div className="">単価</div>
+                <div className="">金額</div>
+                <div className="">削除</div>
+              </div>
             </div>
           </div>
           {lineItemsData.map((lineItem, index) => {
@@ -291,7 +293,7 @@ export function Product() {
             >
               <div className="relative min-h-full flex items-center justify-center">
                 <div
-                  className={`absolute bottom-0 w-full h-[90vh] px-20 py-20 bg-slate-200 rounded-t-4xl shadow-lg overflow-y-auto [scrollbar-gutter: stable] transition-transform duration-[${ANIMATION_MS}ms] ${
+                  className={`absolute bottom-0 h-[90vh] w-full rounded-t-4xl bg-slate-200 px-6 py-8 shadow-lg transition-transform duration-[${ANIMATION_MS}ms] [scrollbar-gutter: stable] sm:px-10 sm:py-12 lg:px-20 lg:py-20 overflow-y-auto ${
                     isSearchVisible ? "translate-y-0" : "translate-y-full"
                   }`}
                   onClick={(e) => e.stopPropagation()}
@@ -306,7 +308,7 @@ export function Product() {
                     </button>
                   </div>
                   {/* 検索バー */}
-                  <div className="mb-8 px-20">
+                  <div className="mb-6 px-6 sm:mb-8 sm:px-10 lg:px-20">
                     <div className="flex w-full items-center">
                       <div className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-400" />
@@ -332,7 +334,7 @@ export function Product() {
                   </div>
 
                   {/* カテゴリーフィルター */}
-                  <div className="flex flex-wrap justify-center gap-3 px-20 mb-10">
+                  <div className="mb-8 flex flex-wrap justify-center gap-3 px-6 sm:mb-10 sm:px-10 lg:px-20">
                     {categoryOptions.map((option) => (
                       <button
                         key={option.value ?? "all"}
@@ -350,7 +352,7 @@ export function Product() {
                   </div>
 
                   {/* メニュー一覧 */}
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                     {filteredMenus.map((menu) => (
                       <div
                         onClick={() => handleSelectMenu(menu)}
@@ -372,7 +374,7 @@ export function Product() {
         </div>
 
         {/* 合計金額 */}
-        <div className="col-span-3 rounded-3xl p-10 px-5 bg-neutral-50">
+        <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 sm:py-8 xl:col-span-3 xl:py-10">
           <div className="flex items-center gap-2 mb-7">
             <Calculator className="pointer-events-none rounded-lg h-7 w-7 p-1 text-neutral-100 bg-indigo-500" />
             <h3 className="text-xl font-bold text-slate-800">合計金額</h3>
