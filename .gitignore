@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+orderData.json
 data.json
 .env
 .env.local

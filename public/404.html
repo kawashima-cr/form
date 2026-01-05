@@ -1,13 +1,34 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>form</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Redirecting...</title>
+    <script>
+      // GitHub Pages SPA fallback for repo: /form/
+      (function () {
+        var l = window.location;
+        var repoBase = "/form";
+
+        // 例: https://xxx.github.io/form/users/1?x=y#z
+        // -> https://xxx.github.io/form/?p=/users/1&q=?x=y&h=#z
+        var pathAfterRepo = l.pathname.startsWith(repoBase)
+          ? l.pathname.slice(repoBase.length)
+          : l.pathname;
+
+        var target =
+          l.origin +
+          repoBase +
+          "/?p=" +
+          encodeURIComponent(pathAfterRepo || "/") +
+          "&q=" +
+          encodeURIComponent(l.search || "") +
+          "&h=" +
+          encodeURIComponent(l.hash || "");
+
+        l.replace(target);
+      })();
+    </script>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <body></body>
 </html>
