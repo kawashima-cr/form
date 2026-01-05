@@ -67,7 +67,7 @@ export function LineItemRow(props: LineItemRowProps) {
   return (
     <div>
       <div
-        className={`${gridCols} flex flex-col gap-3 border-b border-gray-300 px-2 py-3 lg:items-center`}
+        className={`${gridCols} flex flex-col gap-3 lg:gap-2 border-b border-gray-300 px-2 py-8 lg:py-3 lg:items-center`}
       >
         <div className="flex w-full flex-col gap-1">
           <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
@@ -86,66 +86,66 @@ export function LineItemRow(props: LineItemRowProps) {
         </div>
         <div className="flex w-full gap-3 lg:contents">
           <div className="flex w-full flex-1 flex-col gap-1">
-          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
-            数量
-          </span>
-          <input
-            id="qty"
-            name="qty"
-            type="number"
-            className={`${baseInputClass} py-3 px-2 text-zinc-800 ${qtyInputBorderClass}`}
-            value={props.value.qty === 0 ? "" : props.value.qty}
-            onChange={handleQtyChange}
-            readOnly={!isCustom && isNameEmpty}
-          />
+            <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+              数量
+            </span>
+            <input
+              id="qty"
+              name="qty"
+              type="number"
+              className={`${baseInputClass} py-3 px-2 text-zinc-800 ${qtyInputBorderClass}`}
+              value={props.value.qty === 0 ? "" : props.value.qty}
+              onChange={handleQtyChange}
+              readOnly={!isCustom && isNameEmpty}
+            />
           </div>
           <div className="flex w-full flex-1 flex-col gap-1">
-          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
-            単位
-          </span>
-          <input
-            id="unit"
-            name="unit"
-            type="text"
-            className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass}`}
-            value={props.value.unit}
-            readOnly={props.value.menuId !== "custom"}
-            onChange={handleUnitChange}
-          />
+            <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+              単位
+            </span>
+            <input
+              id="unit"
+              name="unit"
+              type="text"
+              className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass}`}
+              value={props.value.unit}
+              readOnly={props.value.menuId !== "custom"}
+              onChange={handleUnitChange}
+            />
           </div>
         </div>
         <div className="flex w-full gap-3 lg:contents">
           <div className="flex w-full flex-1 flex-col gap-1">
-          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
-            単価
-          </span>
-          <input
-            id="unitPrice"
-            name="unitPrice"
-            type="number"
-            className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass} ${hideNumberSpinClass}`}
-            value={props.value.unitPrice}
-            readOnly={props.value.menuId !== "custom"}
-            onChange={handleUnitPriceChange}
-          />
+            <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+              単価
+            </span>
+            <input
+              id="unitPrice"
+              name="unitPrice"
+              type="number"
+              className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass} ${hideNumberSpinClass}`}
+              value={props.value.unitPrice}
+              readOnly={props.value.menuId !== "custom"}
+              onChange={handleUnitPriceChange}
+            />
           </div>
           <div className="flex w-full flex-1 flex-col gap-1">
-          <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
-            金額
-          </span>
-          <input
-            id="amount"
-            name="amount"
-            type="text"
-            className={`${baseInputClass} border-zinc-300 py-3 px-2 text-zinc-600`}
-            value={amount.toLocaleString("ja-JP")}
-            readOnly
-          />
-        </div>
-        <div className="flex w-full flex-1 flex-col items-end gap-1 lg:items-center">
-          <span className="px-2 text-right text-xs font-semibold text-slate-500 lg:hidden">
-            削除
-          </span>
+            <span className="px-2 text-xs font-semibold text-slate-500 lg:hidden">
+              金額
+            </span>
+            <input
+              id="amount"
+              name="amount"
+              type="text"
+              className={`${baseInputClass} border-zinc-300 py-3 px-2 text-zinc-600`}
+              value={amount.toLocaleString("ja-JP")}
+              readOnly
+            />
+          </div>
+          <div className="flex w-full flex-1 flex-col items-end gap-1 lg:items-center">
+            <span className="px-2 text-right text-xs font-semibold text-slate-500 lg:hidden">
+              削除
+            </span>
             <button
               onClick={props.onRemove}
               type="button"

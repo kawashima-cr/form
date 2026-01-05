@@ -242,7 +242,7 @@ export function Product() {
             <button
               type="button"
               onClick={() => openSearch()}
-              className="w-full rounded-xl bg-indigo-600 px-3 py-2 font-semibold text-slate-50 hover:bg-indigo-500 sm:w-20"
+              className="hidden w-full rounded-xl bg-indigo-600 px-3 py-2 font-semibold text-slate-50 hover:bg-indigo-500 lg:block lg:w-20 sm:py-3"
             >
               追加
             </button>
@@ -283,6 +283,13 @@ export function Product() {
               />
             );
           })}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            className="mt-3 w-full rounded-xl bg-indigo-600 px-3 py-3 font-semibold text-slate-50 hover:bg-indigo-500 lg:hidden"
+          >
+            追加
+          </button>
 
           {isSearchOpen && (
             <div
