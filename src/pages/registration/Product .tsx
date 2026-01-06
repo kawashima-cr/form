@@ -24,6 +24,8 @@ export type LineItem = {
   qty: number;
   unit: string;
   unitPrice: number;
+  taxFreeUnitPrice: number;
+  taxRate: 8 | 10;
 };
 type ActionState = { success: boolean; message: string };
 const initialState: ActionState = { success: false, message: "" };
@@ -37,6 +39,8 @@ export function Product() {
       qty: 0,
       unit: "",
       unitPrice: 0,
+      taxFreeUnitPrice: 0,
+      taxRate: 10,
     }))
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -51,7 +55,7 @@ export function Product() {
     type: "success" | "error";
     message: string;
   } | null>(null);
-  const [taxRate, setTaxRate] = useState<8 | 10>(10);
+  const [modalTaxRate, setModalTaxRate] = useState<8 | 10>(10);
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -88,6 +92,8 @@ export function Product() {
         qty: 0,
         unit: "",
         unitPrice: 0,
+        taxFreeUnitPrice: 0,
+        taxRate: 10 as const,
       };
       const nextRow =
         menu.id === "custom"
@@ -97,13 +103,17 @@ export function Product() {
               qty: 1,
               unit: "",
               unitPrice: 0,
+              taxFreeUnitPrice: 0,
+              taxRate: modalTaxRate,
             }
           : {
               menuId: menu.id,
               name: menu.name,
               qty: 1,
               unit: menu.unit,
-              unitPrice: menu.price,
+              unitPrice: Math.floor(menu.price * (1 + modalTaxRate * 0.01)),
+              taxFreeUnitPrice: menu.price,
+              taxRate: modalTaxRate,
             };
 
       if (activeRowIndex !== null) {
@@ -143,6 +153,18 @@ export function Product() {
     setActiveRowIndex(null);
   };
 
+  const onTaxRateToggle = (rowIndex: number, newRate: 8 | 10) => {
+    setLineItemsData((prev) =>
+      prev.map((row, i) => {
+        if (i !== rowIndex) return row;
+        return {
+          ...row,
+          taxRate: newRate,
+          unitPrice: Math.floor(row.taxFreeUnitPrice * (newRate * 0.01 + 1)),
+        };
+      })
+    );
+  };
   const filteredMenus = menuData.filter((menu) => {
     if (selectedCategory && menu.category !== selectedCategory) return false;
     const keyword = debouncedSearchTerm.trim().toLocaleLowerCase();
@@ -157,19 +179,31 @@ export function Product() {
 
   const submitItems = lineItemsData
     .filter((row) => row.menuId !== null)
-    .map((row) => ({ ...row, amount: row.qty * row.unitPrice }));
+    .map((row) => ({
+      menuId: row.menuId,
+      name: row.name,
+      qty: row.qty,
+      unit: row.unit,
+      unitPrice: row.unitPrice,
+      taxRate: row.taxRate,
+      amount: row.qty * row.unitPrice,
+    }));
 
+  // 税抜き小計
   const subtotal = lineItemsData.reduce(
+    (sum, item) => sum + item.qty * item.taxFreeUnitPrice,
+    0
+  );
+
+  const total = lineItemsData.reduce(
     (sum, item) => sum + item.qty * item.unitPrice,
     0
   );
 
-  const tax = Math.floor(subtotal * (taxRate * 0.01));
-
-  const total = subtotal + tax;
+  const tax = total - subtotal;
 
   const gridCols =
-    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_60px_100px_100px_52px_32px]";
 
   const submit = async (
     _prevState: ActionState,
@@ -239,22 +273,16 @@ export function Product() {
             </div>
           </div>
           <div className="flex flex-col gap-2 rounded-t-xl border-b border-gray-300 bg-indigo-100 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={() => openSearch()}
-              className="hidden w-full rounded-xl bg-indigo-600 px-3 py-2 font-semibold text-slate-50 hover:bg-indigo-500 lg:block lg:w-20 sm:py-3"
-            >
-              追加
-            </button>
             <div className="hidden w-full lg:block">
               <div
                 className={`flex-1 text-center py-3 px-2 font-semibold ${gridCols}`}
               >
-                <div className="pr-10">商品選択</div>
+                <div className="">商品選択</div>
                 <div className="">数量</div>
                 <div className="">単位</div>
-                <div className="">単価</div>
-                <div className="">金額</div>
+                <div className="">税込単価</div>
+                <div className="">税込金額</div>
+                <div className="">税率</div>
                 <div className="">削除</div>
               </div>
             </div>
@@ -280,17 +308,23 @@ export function Product() {
                       }
                 }
                 onRemove={() => handleRemoveRow(index)}
+                taxRate={lineItem.taxRate}
+                rowIndex={index}
+                onTaxRateToggle={onTaxRateToggle}
               />
             );
           })}
-          <button
-            type="button"
-            onClick={() => openSearch()}
-            className="mt-3 w-full rounded-xl bg-indigo-600 px-3 py-3 font-semibold text-slate-50 hover:bg-indigo-500 lg:hidden"
-          >
-            追加
-          </button>
+          <div className="grid place-items-center">
+            <button
+              type="button"
+              onClick={() => openSearch()}
+              className="mt-6 w-full sm:w-120 rounded-xl bg-indigo-600 px-3 py-3 font-semibold text-slate-50 hover:bg-indigo-500"
+            >
+              追加
+            </button>
+          </div>
 
+          {/* モーダル */}
           {isSearchOpen && (
             <div
               className={`fixed inset-0 z-50 backdrop-blur-sm bg-black/40 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-opacity duration-[${ANIMATION_MS}ms] ${
@@ -357,6 +391,15 @@ export function Product() {
                       </button>
                     ))}
                   </div>
+                  {/* 税率トグル */}
+                  <div className="flex justify-end mb-4 px-5">
+                    <Switch
+                      checked={modalTaxRate === 10}
+                      onCheckedChange={(checked) =>
+                        setModalTaxRate(checked ? 10 : 8)
+                      }
+                    />
+                  </div>
 
                   {/* メニュー一覧 */}
                   <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -368,9 +411,17 @@ export function Product() {
                         className="col-span-1 flex h-full flex-col min-h-36 px-3 py-4 bg-white border-2 hover:bg-gray-50 border-gray-300 rounded-2xl cursor-pointer"
                       >
                         <h3 className="text-lg font-bold pb-2">{menu.name}</h3>
-                        <p className="flex justify-end mt-auto border-t border-gray-100  pt-1 pr-2 text-indigo-700 text-lg font-bold">
-                          ￥{menu.price.toLocaleString("ja-JP")}
-                        </p>
+                        <div className="mt-auto border-t border-gray-100 pt-2 pr-2 flex justify-end items-end">
+                          <p className="text-xs font-semibold text-slate-500 mr-4 pb-0.5">
+                            税抜 ￥{menu.price.toLocaleString("ja-JP")}
+                          </p>
+                          <p className="text-lg font-bold text-indigo-700">
+                            税込 ￥
+                            {Math.floor(
+                              menu.price * (1 + modalTaxRate * 0.01)
+                            ).toLocaleString("ja-JP")}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -395,11 +446,11 @@ export function Product() {
           <div className="flex items-center justify-between text-slate-600 text-sm">
             <p className="flex items-center">
               消費税
-              <Switch
+              {/* <Switch
                 checked={taxRate === 10}
                 onCheckedChange={(checked) => setTaxRate(checked ? 10 : 8)}
                 className="ml-4"
-              />
+              /> */}
             </p>
             <span className="text-slate-800 font-semibold">
               ￥{tax.toLocaleString("ja-JP")}

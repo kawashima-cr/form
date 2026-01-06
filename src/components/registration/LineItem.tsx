@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 import type { ChangeEvent } from "react";
 import type { MenuDataType } from "./menuData";
 import type { LineItem } from "../../pages/registration/Product ";
+import { Switch } from "../ui/switch";
 
 type LineItemRowProps = {
   onChange: (next: LineItem) => void;
@@ -9,6 +10,9 @@ type LineItemRowProps = {
   menu?: MenuDataType;
   onNameClick?: React.MouseEventHandler<HTMLInputElement>;
   onRemove: React.MouseEventHandler<HTMLButtonElement>;
+  rowIndex: number;
+  taxRate: 8 | 10;
+  onTaxRateToggle: (rowIndex: number, rate: 8 | 10) => void;
 };
 
 export function LineItemRow(props: LineItemRowProps) {
@@ -39,10 +43,13 @@ export function LineItemRow(props: LineItemRowProps) {
     props.onChange({
       ...props.value,
       unitPrice: Number.isNaN(nextPrice) ? 0 : nextPrice,
+      taxFreeUnitPrice: Math.floor(
+        nextPrice / (props.value.taxRate * 0.01 + 1)
+      ),
     });
   };
   const gridCols =
-    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_76px_120px_120px_40px]";
+    "lg:grid lg:gap-3 lg:grid-cols-[minmax(260px,1fr)_88px_60px_100px_100px_52px_32px]";
   const isCustom = props.value.menuId === "custom";
   const isNameEmpty = props.value.name.trim() === "";
   const baseInputClass =
@@ -61,8 +68,7 @@ export function LineItemRow(props: LineItemRowProps) {
     ? ""
     : "hover:bg-gray-100 hover:text-indigo-600";
 
-  const unitPrice = props.value.unitPrice;
-  const amount = unitPrice * props.value.qty;
+  const amount = props.value.unitPrice * props.value.qty;
 
   return (
     <div>
@@ -93,6 +99,8 @@ export function LineItemRow(props: LineItemRowProps) {
               id="qty"
               name="qty"
               type="number"
+              step={1}
+              min={1}
               className={`${baseInputClass} py-3 px-2 text-zinc-800 ${qtyInputBorderClass}`}
               value={props.value.qty === 0 ? "" : props.value.qty}
               onChange={handleQtyChange}
@@ -123,6 +131,8 @@ export function LineItemRow(props: LineItemRowProps) {
               id="unitPrice"
               name="unitPrice"
               type="number"
+              step={1}
+              min={0}
               className={`${baseInputClass} py-3 px-2 ${textInputBorderClass} ${editableCursorClass} ${hideNumberSpinClass}`}
               value={props.value.unitPrice}
               readOnly={props.value.menuId !== "custom"}
@@ -144,6 +154,19 @@ export function LineItemRow(props: LineItemRowProps) {
           </div>
           <div className="flex w-full flex-1 flex-col items-end gap-1 lg:items-center">
             <span className="px-2 text-right text-xs font-semibold text-slate-500 lg:hidden">
+              税率
+            </span>
+
+            <Switch
+              checked={props.taxRate === 10}
+              onCheckedChange={(checked) =>
+                props.onTaxRateToggle(props.rowIndex, checked ? 10 : 8)
+              }
+              className="mt-auto flex items-center"
+            />
+          </div>
+          <div className="flex w-full flex-1 flex-col items-end gap-1 lg:items-center">
+            <span className="px-2 text-right text-xs font-semibold text-slate-500 lg:hidden">
               削除
             </span>
             <button
@@ -151,7 +174,7 @@ export function LineItemRow(props: LineItemRowProps) {
               type="button"
               className="mt-auto flex items-center"
             >
-              <Trash2 className="h-10 w-10 rounded-xl p-2 text-slate-500 transition-all hover:bg-gray-200" />
+              <Trash2 className="h-[30px] w-[30px] p-0.5 rounded-sm text-slate-500 transition-all hover:bg-gray-200" />
             </button>
           </div>
         </div>
