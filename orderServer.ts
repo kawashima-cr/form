@@ -1,45 +1,63 @@
 import express from "express";
 import cors from "cors";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import "dotenv/config";
+import { pool } from "./db";
+import { ResultSetHeader } from "mysql2";
 
 const app = express();
 const PORT = 3002;
-const DATA_FILE = path.join(__dirname, "orderData.json");
 
 app.use(cors());
 app.use(express.json());
 
-const readDataFile = async () => {
-  try {
-    const fileContent = await fs.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(fileContent);
-  } catch {
-    return [];
-  }
-};
+const toMySqlDateTime = (iso: string) => iso.replace("T", " ").slice(0, 19);
 
 app.post("/orders", async (req, res) => {
+  const conn = await pool.getConnection();
   try {
-    const data = await readDataFile();
+    const { items, subtotal, tax, total, createdAt } = req.body;
 
-    const newData = {
-      ...req.body,
-      createdAt: req.body.createdAt ?? new Date().toISOString(),
-    };
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ success: false, error: "itemsが不正です" });
+    }
 
-    data.push(newData);
+    await conn.beginTransaction();
 
-    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+    const created = toMySqlDateTime(createdAt ?? new Date().toISOString());
 
-    res.json({ success: true, message: "送信完了！", data: newData });
+    const [result] = await conn.query<ResultSetHeader>(
+      "INSERT INTO orders (subtotal, tax, total, created_at) VALUES (?, ?, ?, ?)",
+      [subtotal, tax, total, created]
+    );
+
+    for (const item of items) {
+      await conn.query(
+        "INSERT INTO order_items (order_id, menu_id, name, qty, unit, unit_price, tax_rate, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          result.insertId,
+          item.menuId,
+          item.name,
+          item.qty,
+          item.unit,
+          item.unitPrice,
+          item.taxRate,
+          item.amount,
+        ]
+      );
+    }
+
+    await conn.commit();
+    res.json({
+      success: true,
+      message: "送信完了！",
+      orderId: result.insertId,
+    });
   } catch (error) {
+    await conn.rollback();
     console.error("保存エラー:", error);
     res.status(500).json({ success: false, error: "送信失敗..." });
+  } finally {
+    conn.release();
   }
 });
 

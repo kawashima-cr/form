@@ -1,3 +1,4 @@
+//データベース接続だけを担当する部品
 import mysql from "mysql2/promise";
 import "dotenv/config";
 import process from "process";
