@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import { pool } from "./db";
+import { pool } from "./db.js";
 import { ResultSetHeader } from "mysql2";
 
 const app = express();
@@ -13,7 +13,7 @@ app.use(express.json());
 const toMySqlDateTime = (iso: string) => iso.replace("T", " ").slice(0, 19);
 
 app.post("/orders", async (req, res) => {
-  const conn = await pool.getConnection();
+  let conn;
   try {
     const { items, subtotal, tax, total, createdAt } = req.body;
 
@@ -21,6 +21,7 @@ app.post("/orders", async (req, res) => {
       return res.status(400).json({ success: false, error: "itemsが不正です" });
     }
 
+    conn = await pool.getConnection();
     await conn.beginTransaction();
 
     const created = toMySqlDateTime(createdAt ?? new Date().toISOString());
@@ -53,11 +54,19 @@ app.post("/orders", async (req, res) => {
       orderId: result.insertId,
     });
   } catch (error) {
-    await conn.rollback();
+    if (conn) {
+      await conn.rollback();
+    }
     console.error("保存エラー:", error);
     res.status(500).json({ success: false, error: "送信失敗..." });
   } finally {
-    conn.release();
+    if (conn) {
+      try {
+        conn.release();
+      } catch (error) {
+        console.error(error);
+      }
+    }
   }
 });
 
