@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import { pool } from "./db.js";
+import { prisma } from "./src/lib/prisma.js";
 import { ResultSetHeader } from "mysql2";
 
 const app = express();
@@ -67,6 +68,38 @@ app.post("/orders", async (req, res) => {
         console.error(error);
       }
     }
+  }
+});
+
+app.get("/orders", async (_req, res) => {
+  try {
+    const orders = await prisma.orders.findMany({
+      include: { order_items: true },
+      orderBy: { id: "desc" },
+    });
+
+    const data = orders.map((order) => ({
+      id: order.id,
+      subtotal: order.subtotal,
+      tax: order.tax,
+      total: order.total,
+      created_at: order.created_at,
+      items: order.order_items.map((item) => ({
+        itemId: item.id,
+        menuId: item.menu_id,
+        name: item.name,
+        qty: item.qty,
+        unit: item.unit,
+        unitPrice: item.unit_price,
+        taxRate: item.tax_rate,
+        amount: item.amount,
+      })),
+    }));
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("一覧取得エラー:", error);
+    res.status(500).json({ success: false, error: "取得失敗..." });
   }
 });
 

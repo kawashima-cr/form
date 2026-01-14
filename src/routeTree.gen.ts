@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegistrationRouteImport } from './routes/registration'
 import { Route as PostsRouteImport } from './routes/posts'
+import { Route as OrderListRouteImport } from './routes/orderList'
 import { Route as ListRouteImport } from './routes/list'
 import { Route as FormRouteImport } from './routes/form'
 import { Route as PostsPostIdRouteImport } from './routes/posts.$postId'
+import { Route as ListPageRouteImport } from './routes/list.$page'
 
 const RegistrationRoute = RegistrationRouteImport.update({
   id: '/registration',
@@ -23,6 +25,11 @@ const RegistrationRoute = RegistrationRouteImport.update({
 const PostsRoute = PostsRouteImport.update({
   id: '/posts',
   path: '/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderListRoute = OrderListRouteImport.update({
+  id: '/orderList',
+  path: '/orderList',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListRoute = ListRouteImport.update({
@@ -40,46 +47,74 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/$postId',
   getParentRoute: () => PostsRoute,
 } as any)
+const ListPageRoute = ListPageRouteImport.update({
+  id: '/$page',
+  path: '/$page',
+  getParentRoute: () => ListRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/form': typeof FormRoute
-  '/list': typeof ListRoute
+  '/list': typeof ListRouteWithChildren
+  '/orderList': typeof OrderListRoute
   '/posts': typeof PostsRouteWithChildren
   '/registration': typeof RegistrationRoute
+  '/list/$page': typeof ListPageRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRoutesByTo {
   '/form': typeof FormRoute
-  '/list': typeof ListRoute
+  '/list': typeof ListRouteWithChildren
+  '/orderList': typeof OrderListRoute
   '/posts': typeof PostsRouteWithChildren
   '/registration': typeof RegistrationRoute
+  '/list/$page': typeof ListPageRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/form': typeof FormRoute
-  '/list': typeof ListRoute
+  '/list': typeof ListRouteWithChildren
+  '/orderList': typeof OrderListRoute
   '/posts': typeof PostsRouteWithChildren
   '/registration': typeof RegistrationRoute
+  '/list/$page': typeof ListPageRoute
   '/posts/$postId': typeof PostsPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/form' | '/list' | '/posts' | '/registration' | '/posts/$postId'
+  fullPaths:
+    | '/form'
+    | '/list'
+    | '/orderList'
+    | '/posts'
+    | '/registration'
+    | '/list/$page'
+    | '/posts/$postId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/form' | '/list' | '/posts' | '/registration' | '/posts/$postId'
+  to:
+    | '/form'
+    | '/list'
+    | '/orderList'
+    | '/posts'
+    | '/registration'
+    | '/list/$page'
+    | '/posts/$postId'
   id:
     | '__root__'
     | '/form'
     | '/list'
+    | '/orderList'
     | '/posts'
     | '/registration'
+    | '/list/$page'
     | '/posts/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   FormRoute: typeof FormRoute
-  ListRoute: typeof ListRoute
+  ListRoute: typeof ListRouteWithChildren
+  OrderListRoute: typeof OrderListRoute
   PostsRoute: typeof PostsRouteWithChildren
   RegistrationRoute: typeof RegistrationRoute
 }
@@ -98,6 +133,13 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts'
       preLoaderRoute: typeof PostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orderList': {
+      id: '/orderList'
+      path: '/orderList'
+      fullPath: '/orderList'
+      preLoaderRoute: typeof OrderListRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list': {
@@ -121,8 +163,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof PostsRoute
     }
+    '/list/$page': {
+      id: '/list/$page'
+      path: '/$page'
+      fullPath: '/list/$page'
+      preLoaderRoute: typeof ListPageRouteImport
+      parentRoute: typeof ListRoute
+    }
   }
 }
+
+interface ListRouteChildren {
+  ListPageRoute: typeof ListPageRoute
+}
+
+const ListRouteChildren: ListRouteChildren = {
+  ListPageRoute: ListPageRoute,
+}
+
+const ListRouteWithChildren = ListRoute._addFileChildren(ListRouteChildren)
 
 interface PostsRouteChildren {
   PostsPostIdRoute: typeof PostsPostIdRoute
@@ -136,7 +195,8 @@ const PostsRouteWithChildren = PostsRoute._addFileChildren(PostsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   FormRoute: FormRoute,
-  ListRoute: ListRoute,
+  ListRoute: ListRouteWithChildren,
+  OrderListRoute: OrderListRoute,
   PostsRoute: PostsRouteWithChildren,
   RegistrationRoute: RegistrationRoute,
 }
