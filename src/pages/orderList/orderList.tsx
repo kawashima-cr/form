@@ -6,7 +6,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Route } from "@/routes/orderList";
+import { Route } from "@/routes/orderList.index";
+import { Link, Outlet } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 
 type OrderItem = {
@@ -89,6 +90,15 @@ export default function OrderList() {
                       <TableCell rowSpan={order.items.length}>
                         {formatDate(order.created_at)}
                       </TableCell>
+                      <TableCell rowSpan={order.items.length}>
+                        <Link
+                          to="/orderList/$id"
+                          params={{ id: String(order.id) }}
+                          className="bg-indigo-600 text-gray-50 px-4 py-1.5 rounded-lg hover:bg-indigo-500"
+                        >
+                          編集
+                        </Link>
+                      </TableCell>
                     </>
                   )}
                 </TableRow>
@@ -97,6 +107,7 @@ export default function OrderList() {
           </TableBody>
         </Table>
       </div>
+      <Outlet />
     </div>
   );
 }
