@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Route } from "@/routes/orderList.$id";
 import {
   Table,
@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useNavigate } from "@tanstack/react-router";
 
 type OrderItem = {
   itemId: number;
@@ -52,10 +53,20 @@ export default function OrderEdit() {
   const [items, setItems] = useState<OrderItem[]>(initialItems);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  const timerRef = useRef<number | null>(null);
 
   const subtotal = useMemo(() => calcSubtotal(items), [items]);
   const total = useMemo(() => calcTotal(items), [items]);
   const tax = total - subtotal;
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const updateItem = <K extends keyof OrderItem>(
     index: number,
@@ -75,6 +86,7 @@ export default function OrderEdit() {
 
     setIsSaving(true);
     setFeedback(null);
+
     try {
       const payload = {
         items: items.map((item) => ({
@@ -91,20 +103,18 @@ export default function OrderEdit() {
         total,
       };
 
-      const response = await fetch(
-        `http://localhost:3002/orders/${order.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`http://localhost:3002/orders/${order.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         setFeedback({ type: "error", message: "更新に失敗しました" });
         return;
       }
       setFeedback({ type: "success", message: "更新完了" });
+      timerRef.current = setTimeout(() => navigate({ to: "/orderList" }), 1000);
     } catch (error) {
       console.error(error);
       setFeedback({ type: "error", message: "更新に失敗しました" });
