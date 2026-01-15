@@ -117,10 +117,12 @@ export default function OrderEdit() {
     <div className="mx-4 mt-6 text-gray-700 sm:mx-6 sm:mt-8 lg:mx-10 lg:mt-10">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-2xl font-bold text-slate-800">注文編集</h2>
-        <span className="text-sm text-slate-500">注文ID: {order.id}</span>
+        <span className="text-sm text-slate-500 font-bold mr-4">
+          注文ID: {order.id}
+        </span>
       </div>
 
-      <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 sm:pt-8 xl:py-10">
+      <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 sm:pt-8 xl:py-10 shadow">
         <Table>
           <TableHeader>
             <TableRow>

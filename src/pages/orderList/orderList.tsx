@@ -45,7 +45,7 @@ export default function OrderList() {
         <h2 className="text-2xl font-bold text-slate-800">注文一覧表</h2>
       </div>
 
-      <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 pb-30 sm:pt-8 xl:col-span-9 xl:py-10">
+      <div className="col-span-1 rounded-3xl bg-neutral-50 px-5 py-6 pb-30 sm:pt-8 xl:col-span-9 xl:py-10 shadow">
         <Table>
           <TableHeader>
             <TableRow>
