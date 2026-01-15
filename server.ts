@@ -30,15 +30,6 @@ const readDataFile = async (): Promise<FormDataDB[]> => {
   }
 };
 
-// const validId = (req, res) => {
-//   const id = Number(req.params.id);
-//   if (Number.isNaN(id)) {
-//     return res
-//       .status(400)
-//       .json({ success: false, error: "不正なIDが指定されました" });
-//   }
-// }
-
 app.post("/api/data", async (req, res) => {
   try {
     const data = await readDataFile();

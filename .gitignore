@@ -27,3 +27,7 @@ data.json
 *.njsproj
 *.sln
 *.sw?
+
+/src/generated/prisma
+
+/memo

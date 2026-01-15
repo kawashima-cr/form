@@ -10,15 +10,17 @@ export default function Header() {
     { path: "/form", label: "Form" },
     { path: "/list", label: "List" },
     { path: "/registration", label: "Registration" },
+    { path: "/orderList", label: "Order List" },
   ];
 
   return (
-    <header className="w-full fixed top-0 border-b border-gray-300 bg-neutral-50 shadow-2xl">
-      <nav className="w-100 h-15  mx-auto flex items-center justify-center text-center text-gray-600 transition-all">
+    <header className="w-full fixed top-0 border-b border-gray-300 bg-neutral-50 shadow-2xl ">
+      <nav className="h-15  mx-auto flex items-center justify-center text-center text-gray-600">
         {Links.map((link) => (
           <Link
+            key={link.path}
             to={link.path}
-            className="w-50 p-2 mx-2  hover:font-semibold"
+            className="min-w-30 p-2 mx-2 hover:text-gray-800 transition-all"
             activeProps={{
               className: "font-bold text-gray-800 border-b-2 border-indigo-600",
             }}
